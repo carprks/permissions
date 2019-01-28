@@ -1,0 +1,9 @@
+version: '3'
+services:
+  go:
+    image: carprks/${SERVICENAME}:${VERSION}
+    env_file:
+        - .env
+    ports:
+      - 8080:80
+
