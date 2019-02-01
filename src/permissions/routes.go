@@ -18,6 +18,7 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 		Status: "pass",
 	})
 	w.Write(j)
+	return
 }
 
 // General
@@ -28,6 +29,11 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Println(err)
+		return
+	}
+
+	if len(body) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -43,6 +49,9 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p.Response())
 }
 
+func RetrieveAllRoute(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(700)
+}
 func RetrieveRoute(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(701)
 }
@@ -57,17 +66,21 @@ func DeleteRoute(w http.ResponseWriter, r *http.Request) {
 
 // User
 func CreateUserRoute(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(704)
+	w.WriteHeader(800)
+}
+
+func RetrieveUserAllRoute(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(801)
 }
 
 func RetrieveUserRoute(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(705)
+	w.WriteHeader(802)
 }
 
 func UpdateUserRoute(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(706)
+	w.WriteHeader(803)
 }
 
 func DeleteUserRoute(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(707)
+	w.WriteHeader(804)
 }

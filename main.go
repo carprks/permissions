@@ -16,17 +16,19 @@ func main() {
 	// HealthCheck
 	router.HandleFunc("/healthcheck", permissions.HealthCheck)
 
-	// General Permissions
-	router.HandleFunc("/", permissions.CreateRoute).Methods("POST")
-	router.HandleFunc("/", permissions.RetrieveRoute).Methods("GET")
-	router.HandleFunc("/", permissions.UpdateRoute).Methods("PATCH")
-	router.HandleFunc("/", permissions.DeleteRoute).Methods("DELETE")
-
 	// User Permissions
-	router.HandleFunc("/user", permissions.CreateUserRoute).Methods("POST")
-	router.HandleFunc("/user", permissions.RetrieveUserRoute).Methods("GET")
-	router.HandleFunc("/user", permissions.UpdateUserRoute).Methods("PATCH")
-	router.HandleFunc("/user", permissions.DeleteUserRoute).Methods("DELETE")
+	router.HandleFunc("/users/", permissions.CreateUserRoute).Methods("POST")
+	router.HandleFunc("/users/", permissions.RetrieveUserAllRoute).Methods("GET")
+	router.HandleFunc("/users/{permission}/", permissions.RetrieveUserRoute).Methods("GET")
+	router.HandleFunc("/users/{permission}/", permissions.UpdateUserRoute).Methods("PATCH")
+	router.HandleFunc("/users/{permission}/", permissions.DeleteUserRoute).Methods("DELETE")
+
+	// General Permission
+	router.HandleFunc("/", permissions.CreateRoute).Methods("POST")
+	router.HandleFunc("/", permissions.RetrieveAllRoute).Methods("GET")
+	router.HandleFunc("/{permission}/", permissions.RetrieveRoute).Methods("GET")
+	router.HandleFunc("/{permission}/", permissions.UpdateRoute).Methods("PATCH")
+	router.HandleFunc("/{permission}/", permissions.DeleteRoute).Methods("DELETE")
 
 	// Start Server
 	if os.Getenv("PORT") != "" {
