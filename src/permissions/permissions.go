@@ -4,7 +4,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-func (pr PermissionRequest) Create() (p Permission) {
+func (pr PermissionRequest) Create() (p Permission, err error) {
 	u := uuid.NewV4()
 
 	p.Id = u.String()
@@ -12,7 +12,7 @@ func (pr PermissionRequest) Create() (p Permission) {
 	p.AllowedTo = pr.Permission
 	p.User = pr.User
 
-	return p
+	return p, err
 }
 
 func (p Permission) Response() (pr PermissionResponse) {

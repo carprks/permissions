@@ -45,7 +45,11 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := pr.Create()
+	p, err := pr.Create()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	json.NewEncoder(w).Encode(p.Response())
 }
 
