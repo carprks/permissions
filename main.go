@@ -3,18 +3,26 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"main/src/permissions"
+	"main/src/probe"
 	"net/http"
 	"os"
 )
 
-func main() {
+func _main(args []string) int {
+	port := "80"
+	if len(os.Getenv("PORT")) >= 2 {
+		port = os.Getenv("PORT")
+	}
+
 	// Router
 	router := mux.NewRouter().StrictSlash(true)
 
 	// HealthCheck
 	router.HandleFunc("/healthcheck", permissions.HealthCheck)
+
+	// Probe
+	router.HandleFunc("/probe", probe.Probe)
 
 	// User Permissions
 	router.HandleFunc("/users/", permissions.CreateUserRoute).Methods("POST")
@@ -31,10 +39,17 @@ func main() {
 	router.HandleFunc("/{permission}/", permissions.DeleteRoute).Methods("DELETE")
 
 	// Start Server
-	if os.Getenv("PORT") != "" {
-		fmt.Println(fmt.Sprintf("Starting Server on Port :%s", os.Getenv("PORT")))
-		log.Fatal("Start Server", http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), router))
-	} else {
-		log.Fatal("No Port Specified")
+	fmt.Println(fmt.Sprintf("Starting Server on Port :%s", port))
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), router); err != nil {
+		fmt.Println(fmt.Sprintf("HTTP: %v", err))
+		return 1
 	}
+
+	fmt.Println("Died but nicely")
+	return 0
+}
+
+func main() {
+	os.Exit(_main(os.Args[1:]))
 }
