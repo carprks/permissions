@@ -212,3 +212,5 @@ Pods/
 # Env
 .env
 main
+cover/
+coverage.html

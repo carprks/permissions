@@ -6,4 +6,7 @@ services:
         - .env
     ports:
       - 8080:80
-
+    links:
+      - db
+  db:
+    image: amazon/dynamodb-local:latest

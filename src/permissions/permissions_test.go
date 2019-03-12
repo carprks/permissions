@@ -7,22 +7,26 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	pr := permissions.PermissionRequest{}
-
 	tests := []struct {
 		request permissions.Permission
-		expect  string
+		expect  permissions.Permission
 		err     error
 	}{
 		{
-			expect: permissions.Permission{},
+			expect: permissions.Permission{
+				Name: "tester",
+			},
 			err:    nil,
 		},
 	}
 
 	for _, test := range tests {
+		pr := permissions.PermissionRequest{
+			Name: "tester",
+		}
+
 		response, err := pr.Create()
 		assert.IsType(t, test.err, err)
-		assert.Equal(t, test.expect, response)
+		assert.Equal(t, test.expect.Name, response.Name)
 	}
 }

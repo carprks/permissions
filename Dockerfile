@@ -1,10 +1,25 @@
 # Build box
-FROM golang:1.11.1 AS build
+FROM golang:1.12 AS build
 
 RUN mkdir -p /home/main
 WORKDIR /home/main
-ADD . /home/main
-RUN go get -d ./...
+
+# Get Lint
+ENV GO111MODULE=auto
+RUN go get -u golang.org/x/lint/golint
+
+# Dependencies
+ENV GO111MODULE=on
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# Lint and Test
+COPY . .
+RUN golint -set_exit_status ./...
+RUN go test -short ./...
+RUN go test -race -short ./...
+RUN go test -msan -short ./...
 
 # Build
 ARG build
@@ -36,7 +51,11 @@ RUN echo "#!/bin/bash" > ./entrypoint.sh
 RUN echo "./${serviceName}" >> ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# EntryPoint
 ENTRYPOINT ["sh", "./entrypoint.sh"]
+
+# HealthCheck
+HEALTHCHECK --interval=5s --timeout=2s --retries=12 CMD curl --silent --fail localhost/probe || exit 1
 
 # Expose Port
 EXPOSE 80
