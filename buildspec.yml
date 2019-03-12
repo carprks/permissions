@@ -11,7 +11,6 @@ phases:
         --build-arg build=$COMMIT_HASH
         --build-arg version=$IMAGE_TAG
         --build-arg serviceName=permissions
-        --build-arg GOOGLE_API_KEY=$GOOGLE_API_KEY
         --build-arg AWS_ECR=$AWS_ECR
         -f Dockerfile .
       - docker tag $AWS_ECR/permissions:latest $AWS_ECR/permissions:$IMAGE_TAG
