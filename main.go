@@ -24,6 +24,9 @@ func _main(args []string) int {
 	// Probe
 	router.HandleFunc("/probe", probe.Probe)
 
+	// Tester
+	router.HandleFunc("/tester", probe.Tester)
+
 	// User Permissions
 	router.HandleFunc("/users/", permissions.CreateUserRoute).Methods("POST")
 	router.HandleFunc("/users/", permissions.RetrieveUserAllRoute).Methods("GET")
