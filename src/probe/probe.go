@@ -26,6 +26,7 @@ func Probe(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Tester so we can test dev over live
 func Tester(w http.ResponseWriter, r *http.Request) {
 	buf, _ := ioutil.ReadAll(r.Body)
 	if len(buf) >= 1 {
