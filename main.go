@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"main/src/healthcheck"
 	"main/src/permissions"
 	"main/src/probe"
 	"net/http"
@@ -18,25 +19,25 @@ func _main(args []string) int {
 	// Router
 	router := mux.NewRouter().StrictSlash(true)
 
-	// HealthCheck
-	router.HandleFunc("/healthcheck", permissions.HealthCheck)
+	// healthcheck
+	router.HandleFunc("/healthcheck", healthcheck.HTTP)
 
 	// Probe
-	router.HandleFunc("/probe", probe.Probe)
+	router.HandleFunc("/probe", probe.HTTP)
 
 	// User Permissions
-	router.HandleFunc("/users/", permissions.CreateUserRoute).Methods("POST")
-	router.HandleFunc("/users/", permissions.RetrieveUserAllRoute).Methods("GET")
-	router.HandleFunc("/users/{permission}/", permissions.RetrieveUserRoute).Methods("GET")
-	router.HandleFunc("/users/{permission}/", permissions.UpdateUserRoute).Methods("PATCH")
-	router.HandleFunc("/users/{permission}/", permissions.DeleteUserRoute).Methods("DELETE")
+	router.HandleFunc("/users/", permissions.CreateUser).Methods("POST")
+	router.HandleFunc("/users/", permissions.RetrieveAllUsers).Methods("GET")
+	router.HandleFunc("/users/{permission}/", permissions.RetrieveUser).Methods("GET")
+	router.HandleFunc("/users/{permission}/", permissions.UpdateUser).Methods("PATCH")
+	router.HandleFunc("/users/{permission}/", permissions.DeleteUser).Methods("DELETE")
 
 	// General Permission
-	router.HandleFunc("/", permissions.CreateRoute).Methods("POST")
-	router.HandleFunc("/", permissions.RetrieveAllRoute).Methods("GET")
-	router.HandleFunc("/{permission}/", permissions.RetrieveRoute).Methods("GET")
-	router.HandleFunc("/{permission}/", permissions.UpdateRoute).Methods("PATCH")
-	router.HandleFunc("/{permission}/", permissions.DeleteRoute).Methods("DELETE")
+	router.HandleFunc("/", permissions.Create).Methods("POST")
+	router.HandleFunc("/", permissions.RetrieveAll).Methods("GET")
+	router.HandleFunc("/{permission}/", permissions.RetrievePermissions).Methods("GET")
+	router.HandleFunc("/{permission}/", permissions.UpdatePermission).Methods("PATCH")
+	router.HandleFunc("/{permission}/", permissions.DeletePermission).Methods("DELETE")
 
 	// Start Server
 	fmt.Println(fmt.Sprintf("Starting Server on Port :%s", port))

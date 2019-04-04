@@ -6,6 +6,7 @@ type Permission struct {
 	Name      string
 	AllowedTo string
 	User      string
+	Status    PermissionStatus
 }
 
 // PermissionRequest struct
@@ -13,11 +14,6 @@ type PermissionRequest struct {
 	Name       string `json:"name"`
 	Permission string `json:"permission"`
 	User       string `json:"user"`
-}
-
-// PermissionResponse struct
-type PermissionResponse struct {
-	Status PermissionStatus `json:"status"`
 }
 
 // PermissionStatus string

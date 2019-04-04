@@ -7,21 +7,6 @@ import (
 	"net/http"
 )
 
-// HealthCheck checker
-func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	type Healthy struct {
-		Status string `json:"status"`
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/health+json")
-	j, _ := json.Marshal(Healthy{
-		Status: "pass",
-	})
-	w.Write(j)
-	return
-}
-
 // CreateRoute general permission
 func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -51,7 +36,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(p.Response())
+	json.NewEncoder(w).Encode(p)
 }
 
 // RetrieveAllRoute general permission

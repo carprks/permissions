@@ -53,7 +53,7 @@ RUN chmod +x ./entrypoint.sh
 # EntryPoint
 ENTRYPOINT ["sh", "./entrypoint.sh"]
 
-# HealthCheck
+# healthcheck
 HEALTHCHECK --interval=5s --timeout=2s --retries=12 CMD curl --silent --fail localhost/probe || exit 1
 
 # Expose Port
