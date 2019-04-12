@@ -39,3 +39,5 @@ if [[ -e $(pwd)/docker-compose.yml ]]; then
 else
     docker run -P --rm -d -it --name $dockerPath carprks/$dockerPath:$version
 fi
+
+aws dynamodb create-table --table-name permissions --attribute-definitions AttributeName=identifier,AttributeType=S --key-schema AttributeName=identifier,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --endpoint-url http://docker.devel:8000

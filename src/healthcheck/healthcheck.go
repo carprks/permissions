@@ -33,7 +33,7 @@ func HTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// check do the health check itself
+// Check do the health check itself
 func (h HealthCheck) Check() (Health, error) {
 	health := Health{
 		Name: h.Name,

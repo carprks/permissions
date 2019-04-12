@@ -14,16 +14,33 @@ func TestCreate(t *testing.T) {
 	}{
 		{
 			request: permissions.PermissionRequest{
-				Name: "tester",
-				Permission: "test",
-				User: "test",
+				Name: "tester1",
+				Permission: "test1",
+				User: "test1",
 			},
 			expect: permissions.Permission{
-				ID: "388f43c8-4c32-580c-b192-c9ad602a01c2",
-				Name: "tester",
-				User: "test",
+				ID: "dce68a10-cb43-5d69-a488-2280f3fd5eb3",
+				Name: "tester1",
+				User: "test1",
+				Status: permissions.PermissionGood,
+				AllowedTo: "test1",
+				Company: true,
+			},
+			err:    nil,
+		},
+		{
+			request: permissions.PermissionRequest{
+				Name: "tester1",
+				Permission: "test1",
+				User: "test1",
+			},
+			expect: permissions.Permission{
+				ID: "dce68a10-cb43-5d69-a488-2280f3fd5eb3",
+				Name: "tester1",
+				User: "test1",
 				Status: permissions.PermissionBad,
-				AllowedTo: "test",
+				AllowedTo: "test1",
+				Company: true,
 			},
 			err:    nil,
 		},
@@ -34,6 +51,8 @@ func TestCreate(t *testing.T) {
 		assert.IsType(t, test.err, err)
 		assert.Equal(t, test.expect, response)
 	}
+
+	tests[1].request.DeletePermission()
 }
 
 func TestCreateUser(t *testing.T) {
@@ -49,11 +68,28 @@ func TestCreateUser(t *testing.T) {
 				User: "test",
 			},
 			expect: permissions.Permission{
-				ID: "4ebc7ea4-7d5b-5e8d-9ade-9d13ada8b350",
+				ID: "ceebe569-be51-5636-b31c-935e5184cb26",
+				Name: "tester",
+				User: "test",
+				Status: permissions.PermissionGood,
+				AllowedTo: "test",
+				Company: false,
+			},
+			err:    nil,
+		},
+		{
+			request: permissions.PermissionRequest{
+				Name: "tester",
+				Permission: "test",
+				User: "test",
+			},
+			expect: permissions.Permission{
+				ID: "ceebe569-be51-5636-b31c-935e5184cb26",
 				Name: "tester",
 				User: "test",
 				Status: permissions.PermissionBad,
 				AllowedTo: "test",
+				Company: false,
 			},
 			err:    nil,
 		},
@@ -64,4 +100,5 @@ func TestCreateUser(t *testing.T) {
 		assert.IsType(t, test.err, err)
 		assert.Equal(t, test.expect, response)
 	}
+	tests[1].request.DeleteUser()
 }
