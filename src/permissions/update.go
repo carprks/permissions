@@ -8,7 +8,7 @@ func (pr PermissionRequestUpdate) UpdateUser() (Permission, error) {
 		ID: pr.Old.getCompanyUUID(),
 		Name: pr.Old.Name,
 		AllowedTo: pr.Old.Permission,
-		User: pr.Old.User,
+		Identity: pr.Old.Identity,
 		Company: false,
 	}
 	found, err := old.retrieve()
@@ -26,7 +26,7 @@ func (pr PermissionRequestUpdate) UpdateUser() (Permission, error) {
 			ID: pr.New.getUserUUID(),
 			Name: pr.New.Name,
 			AllowedTo: pr.New.Permission,
-			User: pr.New.User,
+			Identity: pr.New.Identity,
 			Company: false,
 		}
 		resp, err := newP.create()
@@ -51,7 +51,7 @@ func (pr PermissionRequestUpdate) UpdatePermission() (Permission, error) {
 		ID: pr.Old.getCompanyUUID(),
 		Name: pr.Old.Name,
 		AllowedTo: pr.Old.Permission,
-		User: pr.Old.User,
+		Identity: pr.Old.Identity,
 		Company: true,
 	}
 	found, err := old.retrieve()
@@ -69,7 +69,7 @@ func (pr PermissionRequestUpdate) UpdatePermission() (Permission, error) {
 			ID: pr.New.getCompanyUUID(),
 			Name: pr.New.Name,
 			AllowedTo: pr.New.Permission,
-			User: pr.New.User,
+			Identity: pr.New.Identity,
 			Company: true,
 		}
 		resp, err := newP.create()

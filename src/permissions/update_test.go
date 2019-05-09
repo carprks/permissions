@@ -20,23 +20,23 @@ func TestUpdatePermission(t *testing.T) {
 			create: permissions.PermissionRequest{
 				Name: testCreate,
 				Permission: testCreate,
-				User: testCreate,
+				Identity: testCreate,
 			},
 			update: permissions.PermissionRequestUpdate{
 				Old: permissions.PermissionRequest{
 					Name: testCreate,
 					Permission: testCreate,
-					User: testCreate,
+					Identity: testCreate,
 				},
 				New: permissions.PermissionRequest{
 					Name: testCreate,
 					Permission: testUpdate,
-					User: testCreate,
+					Identity: testCreate,
 				},
 			},
 			expect: permissions.Permission{
 				ID: "57186896-4148-5e58-9712-04ed2ba25a77",
-				User: testCreate,
+				Identity: testCreate,
 				AllowedTo: testUpdate,
 				Name: testCreate,
 				Company: true,
@@ -68,23 +68,23 @@ func TestUpdateUser(t *testing.T) {
 			create: permissions.PermissionRequest{
 				Name: testCreate,
 				Permission: testCreate,
-				User: testCreate,
+				Identity: testCreate,
 			},
 			update: permissions.PermissionRequestUpdate{
 				Old: permissions.PermissionRequest{
 					Name: testCreate,
 					Permission: testCreate,
-					User: testCreate,
+					Identity: testCreate,
 				},
 				New: permissions.PermissionRequest{
 					Name: testCreate,
 					Permission: testUpdate,
-					User: testCreate,
+					Identity: testCreate,
 				},
 			},
 			expect: permissions.Permission{
 				ID: "0c044928-cdd8-50f6-b1c7-ff1abf057fbe",
-				User: testCreate,
+				Identity: testCreate,
 				AllowedTo: testUpdate,
 				Name: testCreate,
 				Company: false,

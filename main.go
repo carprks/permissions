@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"main/src/healthcheck"
 	"main/src/permissions"
 	"main/src/probe"
@@ -11,6 +12,13 @@ import (
 )
 
 func _main(args []string) int {
+	// development
+	if len(args) >= 1 {
+		if args[0] == "localDev" {
+			godotenv.Load()
+		}
+	}
+
 	port := "80"
 	if len(os.Getenv("PORT")) >= 2 {
 		port = os.Getenv("PORT")

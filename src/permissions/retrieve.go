@@ -31,7 +31,7 @@ func (pr PermissionRequest) RetrievePermissions() (p Permission, err error) {
 		ID: pr.getCompanyUUID(),
 		Name: pr.Name,
 		AllowedTo: pr.Permission,
-		User: pr.User,
+		Identity: pr.Identity,
 		Company: true,
 		Status: PermissionGood,
 	}
@@ -50,7 +50,7 @@ func (pr PermissionRequest) RetrieveUser() (p Permission, err error) {
 		ID: pr.getUserUUID(),
 		Name: pr.Name,
 		AllowedTo: pr.Permission,
-		User: pr.User,
+		Identity: pr.Identity,
 		Company: false,
 	}
 

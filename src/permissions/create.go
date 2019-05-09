@@ -1,14 +1,58 @@
 package permissions
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 )
 
 // Create company permission http
 func Create(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	j := PermissionRequestHTTP{}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: err,
+		})
+		return
+	}
+	e := json.Unmarshal(body, &j)
+	if e != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: e,
+		})
+		return
+	}
+
+	pr, err := j.ConvertToPermissionRequest()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: err,
+		})
+		return
+	}
+
+	resp, err := pr.Create()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: err,
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(PermissionResponse{
+		Permission: resp,
+	})
+	return
 }
 
 // Create company permission
@@ -17,7 +61,7 @@ func (pr PermissionRequest) Create() (p Permission, err error) {
 		ID: pr.getCompanyUUID(),
 		Name: pr.Name,
 		AllowedTo: pr.Permission,
-		User: pr.User,
+		Identity: pr.Identity,
 		Company: true,
 	}
 
@@ -26,7 +70,46 @@ func (pr PermissionRequest) Create() (p Permission, err error) {
 
 // CreateUser permission http
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
+	j := PermissionRequestHTTP{}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: err,
+		})
+		return
+	}
+	e := json.Unmarshal(body, &j)
+	if e != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: e,
+		})
+		return
+	}
+
+	pr, err := j.ConvertToPermissionRequest()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	resp, err := pr.CreateUser()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(PermissionResponse{
+			Error: err,
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(PermissionResponse{
+		Permission: resp,
+	})
+	return
 }
 
 // CreateUser permission
@@ -35,7 +118,7 @@ func (pr PermissionRequest) CreateUser() (p Permission, err error) {
 		ID: pr.getUserUUID(),
 		Name: pr.Name,
 		AllowedTo: pr.Permission,
-		User: pr.User,
+		Identity: pr.Identity,
 		Company: false,
 	}
 
@@ -54,13 +137,14 @@ func (pc Permission) create() (Permission, error) {
 		}
 		if !c {
 			p.Status = PermissionGood
-			p, err := p.storeDynamo()
+			ps, err := p.storeDynamo()
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Store Error: %v", err))
 				p.Status = PermissionBad
 
 				return p, err
 			}
+			return ps, nil
 		}
 		return p, nil
 	}

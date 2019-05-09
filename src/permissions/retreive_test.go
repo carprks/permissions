@@ -22,13 +22,13 @@ func TestRetrievePermissions(t *testing.T) {
 			request: permissions.PermissionRequest{
 				Name: testRetrieve,
 				Permission: testRetrieve,
-				User: testRetrieve,
+				Identity: testRetrieve,
 			},
 			expect: permissions.Permission{
 				ID: "73b780c8-b32b-5758-9c0c-069f38899045",
 				Name: testRetrieve,
 				AllowedTo: testRetrieve,
-				User: testRetrieve,
+				Identity: testRetrieve,
 				Company: true,
 				Status: permissions.PermissionGood,
 			},
@@ -38,13 +38,13 @@ func TestRetrievePermissions(t *testing.T) {
 			request: permissions.PermissionRequest{
 				Name: testRetrieveFake,
 				Permission: testRetrieveFake,
-				User: testRetrieveFake,
+				Identity: testRetrieveFake,
 			},
 			expect: permissions.Permission{
 				ID: "abb022fb-ee38-5ac7-b263-428517f522f7",
 				Name: testRetrieveFake,
 				AllowedTo: testRetrieveFake,
-				User: testRetrieveFake,
+				Identity: testRetrieveFake,
 				Status: permissions.PermissionBad,
 				Company: true,
 			},
@@ -77,13 +77,13 @@ func TestRetrieveUser(t *testing.T) {
 			request: permissions.PermissionRequest{
 				Name: testRetrieve,
 				Permission: testRetrieve,
-				User: testRetrieve,
+				Identity: testRetrieve,
 			},
 			expect: permissions.Permission{
 				ID: "cb14809b-d814-52d4-8cde-336c592662bc",
 				Name: testRetrieve,
 				AllowedTo: testRetrieve,
-				User: testRetrieve,
+				Identity: testRetrieve,
 				Status: permissions.PermissionGood,
 				Company: false,
 			},
@@ -94,12 +94,12 @@ func TestRetrieveUser(t *testing.T) {
 			request: permissions.PermissionRequest{
 				Name: testRetrieveFake,
 				Permission: testRetrieveFake,
-				User: testRetrieveFake,
+				Identity: testRetrieveFake,
 			},
 			expect: permissions.Permission{
 				ID: "7a4bc518-32a6-528a-b695-f45c7d20fb1c",
 				Name: testRetrieveFake,
-				User: testRetrieveFake,
+				Identity: testRetrieveFake,
 				AllowedTo: testRetrieveFake,
 				Status: permissions.PermissionBad,
 				Company: false,
@@ -127,21 +127,21 @@ func TestRetrievePermissionAstrix(t *testing.T) {
 	pc := permissions.PermissionRequest{
 		Name: testAll,
 		Permission: "*",
-		User: testAll,
+		Identity: testAll,
 	}
 	pc.Create()
 
 	pr := permissions.PermissionRequest{
 		Name: testAll,
 		Permission: "bob",
-		User: testAll,
+		Identity: testAll,
 	}
 	response, err := pr.RetrievePermissions()
 	assert.IsType(t, nil, err)
 	assert.Equal(t, permissions.Permission{
 		ID: "b2e0917e-d18d-5f00-bbca-bec305dc0302",
 		Name: testAll,
-		User: testAll,
+		Identity: testAll,
 		AllowedTo: "*",
 		Company: true,
 		Status: permissions.PermissionGood,

@@ -9,7 +9,21 @@ import (
     "os"
 )
 
-func (p Permission) storeDynamo() (Permission, error) {
+func stringMapToDynamoMap(perms map[string]string) map[string]*dynamodb.AttributeValue {
+    ret := map[string]*dynamodb.AttributeValue{}
+
+    if len(perms) >= 1 {
+        for key, value := range perms {
+            ret[key] = &dynamodb.AttributeValue{
+                S: aws.String(value),
+            }
+        }
+    }
+
+    return ret
+}
+
+func (p Permissions) storeDynamo() (Permissions, error) {
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
         Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
@@ -24,14 +38,11 @@ func (p Permission) storeDynamo() (Permission, error) {
             "identifier": {
                 S: aws.String(p.ID),
             },
-            "permission": {
-                S: aws.String(p.AllowedTo),
+            "permissions": {
+                M: stringMapToDynamoMap(p.MapPermissions()),
             },
-            "name": {
-                S: aws.String(p.Name),
-            },
-            "user": {
-                S: aws.String(p.User),
+            "identity": {
+                S: aws.String(p.Identity),
             },
             "status": {
                 S: aws.String(string(p.Status)),
@@ -51,33 +62,29 @@ func (p Permission) storeDynamo() (Permission, error) {
     return p, nil
 }
 
-func (p Permission) updateDynamo() (Permission, error) {
+func (p Permissions) updateDynamo() (Permissions, error) {
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
         Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
     })
     if err != nil {
         fmt.Println(fmt.Sprintf("Update Dynamo Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     svc := dynamodb.New(s)
     input := &dynamodb.UpdateItemInput{
         ExpressionAttributeNames: map[string]*string{
             "#PERMISSION": aws.String("permission"),
-            "#NAME": aws.String("name"),
-            "#USER": aws.String("user"),
+            "#IDENTITY": aws.String("identity"),
             "#STATUS": aws.String("status"),
             "#COMPANY": aws.String("company"),
         },
         ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
             ":permission": {
-                S: aws.String(p.AllowedTo),
+                M: stringMapToDynamoMap(p.MapPermissions()),
             },
-            ":name": {
-                S: aws.String(p.Name),
-            },
-            ":user": {
-                S: aws.String(p.User),
+            ":identity": {
+                S: aws.String(p.Identity),
             },
             ":status": {
                 S: aws.String(string(p.Status)),
@@ -93,24 +100,24 @@ func (p Permission) updateDynamo() (Permission, error) {
         },
         ReturnValues: aws.String("ALL_NEW"),
         TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
-        UpdateExpression: aws.String("SET #PERMISSION = :permission, #NAME = :name, #USER = :user, #STATUS = :status, #COMPANY = :company"),
+        UpdateExpression: aws.String("SET #PERMISSION = :permission, #IDENTITY = :identity, #STATUS = :status, #COMPANY = :company"),
     }
     _, err = svc.UpdateItem(input)
     if err != nil {
         fmt.Println(fmt.Sprintf("Update Dynamo Input Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     return p, nil
 }
 
-func (p Permission) deleteDynamo() (Permission, error) {
+func (p Permissions) deleteDynamo() (Permissions, error) {
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
         Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
     })
     if err != nil {
         fmt.Println(fmt.Sprintf("Delete Dynamo Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     svc := dynamodb.New(s)
     input := &dynamodb.DeleteItemInput{
@@ -124,68 +131,63 @@ func (p Permission) deleteDynamo() (Permission, error) {
     _, err = svc.DeleteItem(input)
     if err != nil {
         fmt.Println(fmt.Sprintf("Delete Dynamo Action Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     return p, nil
 }
 
-func (p Permission) retrieveAstrixDynamo() (Permission, error) {
+func (p Permissions) retrieveAstrixDynamo() (Permissions, error) {
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
         Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
     })
     if err != nil {
         fmt.Println(fmt.Sprintf("Retrieve Astrix Dynamo Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     svc := dynamodb.New(s)
     input := &dynamodb.ScanInput{
         TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
         ExpressionAttributeNames: map[string]*string{
-            "#USER": aws.String("user"),
-            "#NAME": aws.String("name"),
+            "#IDENTITY": aws.String("identity"),
         },
         ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-            ":user": {
-                S: aws.String(p.User),
+            ":identity": {
+                S: aws.String(p.Identity),
             },
-            ":name": {
-                S: aws.String(p.Name),
-            } ,
         },
-        FilterExpression: aws.String("#USER = :user AND #NAME = :name"),
+        FilterExpression: aws.String("#IDENTITY = :identity AND #NAME = :name"),
     }
     result, err := svc.Scan(input)
     if err != nil {
         fmt.Println(fmt.Sprintf("Retrieve Astrix Dynamo Scan: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
 
     if len(result.Items) >= 1 {
-        pr := Permission{}
+        pr := Permissions{}
 
         for i := 0; i < len(result.Items); i++ {
             perm := result.Items[i]
 
-            // find specific
-            if *perm["permission"].S == p.AllowedTo {
-                pr = Permission{
-                    ID: *perm["identifier"].S,
-                    User: *perm["user"].S,
-                    AllowedTo: *perm["permission"].S,
-                    Name: *perm["name"].S,
-                    Company: *perm["company"].BOOL,
-                    Status: getStatus(*perm["status"].S),
-                }
-            }
+            // // find specific
+            // if *perm["permission"].S == p.Permissions {
+            //     pr = Permissions{
+            //         ID: *perm["identifier"].S,
+            //         Identity: *perm["identity"].S,
+            //         Permissions: *perm["permission"].S,
+            //         Name: *perm["name"].S,
+            //         Company: *perm["company"].BOOL,
+            //         Status: getStatus(*perm["status"].S),
+            //     }
+            // }
 
             // permission is an astrix
             if *perm["permission"].S == PermissionAstrix {
-                pr = Permission{
+                pr = Permissions{
                     ID: *perm["identifier"].S,
-                    User: *perm["user"].S,
-                    AllowedTo: *perm["permission"].S,
-                    Name: *perm["name"].S,
+                    Identity: *perm["identity"].S,
+                    // Permissions: *perm["permission"].S,
                     Company: *perm["company"].BOOL,
                     Status: getStatus(*perm["status"].S),
                 }
@@ -198,14 +200,14 @@ func (p Permission) retrieveAstrixDynamo() (Permission, error) {
     return Permission{}, errors.New("no permission entry")
 }
 
-func (p Permission) retrieveDynamo() (Permission, error) {
+func (p Permissions) retrieveDynamo() (Permissions, error) {
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
         Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
     })
     if err != nil {
         fmt.Println(fmt.Sprintf("Retrive Dynamo Error: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     svc := dynamodb.New(s)
     input := &dynamodb.GetItemInput{
@@ -219,25 +221,25 @@ func (p Permission) retrieveDynamo() (Permission, error) {
     result, err := svc.GetItem(input)
     if err != nil {
         fmt.Println(fmt.Sprintf("Dynamo Get Item: %v", err))
-        return Permission{}, err
+        return Permissions{}, err
     }
     if len(result.Item) >= 1 {
-        pp := Permission{
+        pp := Permissions{
             ID: *result.Item["identifier"].S,
             Name: *result.Item["name"].S,
             Status: getStatus(*result.Item["status"].S),
-            User: *result.Item["user"].S,
-            AllowedTo: *result.Item["permission"].S,
+            Identity: *result.Item["identity"].S,
+            Permissions: *result.Item["permissions"].M,
             Company: *result.Item["company"].BOOL,
         }
 
         return pp, nil
     }
-    return Permission{}, errors.New("no permission entry")
+    return Permissions{}, errors.New("no permission entry")
 }
 
-func (p Permission) retrieveAllDynamo() ([]Permission, error) {
-    pr := []Permission{}
+func (p Permissions) retrieveAllDynamo() ([]Permissions, error) {
+    pr := []Permissions{}
 
     s, err := session.NewSession(&aws.Config{
         Region: aws.String(os.Getenv("AWS_DB_REGION")),
@@ -254,18 +256,18 @@ func (p Permission) retrieveAllDynamo() ([]Permission, error) {
     result, err := svc.Scan(input)
     if err != nil {
         fmt.Println(fmt.Sprintf("Dynamo Get Item: %v", err))
-        return []Permission{}, err
+        return []Permissions{}, err
     }
     if len(result.Items) >= 1 {
         for i := 0; i < len(result.Items); i++ {
             item := result.Items[i]
 
-            pp := Permission{
+            pp := Permissions{
                 ID: *item["identifier"].S,
                 Name: *item["name"].S,
                 Status: getStatus(*item["status"].S),
-                User: *item["user"].S,
-                AllowedTo: *item["permission"].S,
+                Identity: *item["identity"].S,
+                Permissions: *item["permission"].S,
                 Company: *item["company"].BOOL,
             }
             pr = append(pr, pp)
@@ -273,7 +275,7 @@ func (p Permission) retrieveAllDynamo() ([]Permission, error) {
         return pr, nil
     }
 
-    return []Permission{}, nil
+    return []Permissions{}, nil
 }
 
 // DeleteTable remove the whole table
