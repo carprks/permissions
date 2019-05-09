@@ -44,9 +44,9 @@ func (p Permissions) storeDynamo() (Permissions, error) {
             "identity": {
                 S: aws.String(p.Identity),
             },
-            "status": {
-                S: aws.String(string(p.Status)),
-            },
+            // "status": {
+            //     S: aws.String(string(p.Status)),
+            // },
             "company": {
                 BOOL: aws.Bool(p.Company),
             },
@@ -86,9 +86,9 @@ func (p Permissions) updateDynamo() (Permissions, error) {
             ":identity": {
                 S: aws.String(p.Identity),
             },
-            ":status": {
-                S: aws.String(string(p.Status)),
-            },
+            // ":status": {
+            //     S: aws.String(string(p.Status)),
+            // },
             ":company": {
                 BOOL: aws.Bool(p.Company),
             },
@@ -189,7 +189,7 @@ func (p Permissions) retrieveAstrixDynamo() (Permissions, error) {
                     Identity: *perm["identity"].S,
                     // Permissions: *perm["permission"].S,
                     Company: *perm["company"].BOOL,
-                    Status: getStatus(*perm["status"].S),
+                    // Status: getStatus(*perm["status"].S),
                 }
             }
         }
@@ -197,7 +197,7 @@ func (p Permissions) retrieveAstrixDynamo() (Permissions, error) {
         return pr, nil
     }
 
-    return Permission{}, errors.New("no permission entry")
+    return Permissions{}, errors.New("no permission entry")
 }
 
 func (p Permissions) retrieveDynamo() (Permissions, error) {
@@ -226,10 +226,10 @@ func (p Permissions) retrieveDynamo() (Permissions, error) {
     if len(result.Item) >= 1 {
         pp := Permissions{
             ID: *result.Item["identifier"].S,
-            Name: *result.Item["name"].S,
-            Status: getStatus(*result.Item["status"].S),
+            // Name: *result.Item["name"].S,
+            // Status: getStatus(*result.Item["status"].S),
             Identity: *result.Item["identity"].S,
-            Permissions: *result.Item["permissions"].M,
+            // Permissions: *result.Item["permissions"].M,
             Company: *result.Item["company"].BOOL,
         }
 
@@ -264,10 +264,10 @@ func (p Permissions) retrieveAllDynamo() ([]Permissions, error) {
 
             pp := Permissions{
                 ID: *item["identifier"].S,
-                Name: *item["name"].S,
-                Status: getStatus(*item["status"].S),
+                // Name: *item["name"].S,
+                // Status: getStatus(*item["status"].S),
                 Identity: *item["identity"].S,
-                Permissions: *item["permission"].S,
+                // Permissions: *item["permission"].S,
                 Company: *item["company"].BOOL,
             }
             pr = append(pr, pp)

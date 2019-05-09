@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"main/src/healthcheck"
-	"main/src/permissions"
 	"main/src/probe"
 	"net/http"
 	"os"
@@ -34,18 +33,18 @@ func _main(args []string) int {
 	router.HandleFunc("/probe", probe.HTTP)
 
 	// User Permissions
-	router.HandleFunc("/users/", permissions.CreateUser).Methods("POST")
-	router.HandleFunc("/users/", permissions.RetrieveAllUsers).Methods("GET")
-	router.HandleFunc("/users/{permission}/", permissions.RetrieveUser).Methods("GET")
-	router.HandleFunc("/users/{permission}/", permissions.UpdateUser).Methods("PATCH")
-	router.HandleFunc("/users/{permission}/", permissions.DeleteUser).Methods("DELETE")
+	// router.HandleFunc("/users/", permissions.CreateUser).Methods("POST")
+	// router.HandleFunc("/users/", permissions.RetrieveAllUsers).Methods("GET")
+	// router.HandleFunc("/users/{permission}/", permissions.RetrieveUser).Methods("GET")
+	// router.HandleFunc("/users/{permission}/", permissions.UpdateUser).Methods("PATCH")
+	// router.HandleFunc("/users/{permission}/", permissions.DeleteUser).Methods("DELETE")
 
 	// General Permission
-	router.HandleFunc("/", permissions.Create).Methods("POST")
-	router.HandleFunc("/", permissions.RetrieveAll).Methods("GET")
-	router.HandleFunc("/{permission}/", permissions.RetrievePermissions).Methods("GET")
-	router.HandleFunc("/{permission}/", permissions.UpdatePermission).Methods("PATCH")
-	router.HandleFunc("/{permission}/", permissions.DeletePermission).Methods("DELETE")
+	// router.HandleFunc("/", permissions.Create).Methods("POST")
+	// router.HandleFunc("/", permissions.RetrieveAll).Methods("GET")
+	// router.HandleFunc("/{permission}/", permissions.RetrievePermissions).Methods("GET")
+	// router.HandleFunc("/{permission}/", permissions.UpdatePermission).Methods("PATCH")
+	// router.HandleFunc("/{permission}/", permissions.DeletePermission).Methods("DELETE")
 
 	// Start Server
 	fmt.Println(fmt.Sprintf("Starting Server on Port :%s", port))

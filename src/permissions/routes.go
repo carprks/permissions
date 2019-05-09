@@ -31,12 +31,12 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := pr.Create()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	json.NewEncoder(w).Encode(p)
+	// p, err := pr.Create()
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
+	// json.NewEncoder(w).Encode(p)
 }
 
 // RetrieveAllRoute general permission

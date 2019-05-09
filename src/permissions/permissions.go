@@ -134,6 +134,7 @@ const PermissionAstrix = "*"
 // 	return pr, nil
 // }
 
+// MapPermissions ...
 func (p Permissions) MapPermissions() map[string]string {
 	ret := map[string]string{}
 
