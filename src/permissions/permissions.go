@@ -9,20 +9,18 @@ import (
 
 // PermissionResponse struct
 type PermissionResponse struct {
-	Permissions Permissions `json:"permissions,omitempty"`
-	Error       error       `json:"error,omitempty"`
+	Permission Permission `json:"permission,omitempty"`
+	Error      error      `json:"error,omitempty"`
 }
 
 // Permissions struct
-type Permissions struct {
-	ID          string       `json:"id"`
-	Identity    string       `json:"identity"`
-	Permissions []Permission `json:"permissions"`
-	Company bool `json:"company"`
+type Permission struct {
+	Identity    string        `json:"identity"`
+	Permissions []Permissions `json:"permissions"`
 }
 
 // Permission struct
-type Permission struct {
+type Permissions struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
 }
@@ -135,14 +133,14 @@ const PermissionAstrix = "*"
 // }
 
 // MapPermissions ...
-func (p Permissions) MapPermissions() map[string]string {
-	ret := map[string]string{}
-
-	if len(p.Permissions) >= 1 {
-		for _, perm := range p.Permissions {
-			ret[perm.Name] = perm.Action
-		}
-	}
-
-	return ret
-}
+// func (p Permissions) MapPermissions() map[string]string {
+// 	ret := map[string]string{}
+//
+// 	if len(p.Permissions) >= 1 {
+// 		for _, perm := range p.Permissions {
+// 			ret[perm.Name] = perm.Action
+// 		}
+// 	}
+//
+// 	return ret
+// }
