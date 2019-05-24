@@ -1,12 +1,14 @@
 package src
 
 import (
+	"context"
 	"fmt"
 	"github.com/carprks/permissions/src/permissions"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/keloran/go-healthcheck"
 	"github.com/keloran/go-probe"
+	"net/http"
 	"os"
 	"time"
 )
@@ -29,22 +31,28 @@ func Routes() chi.Router {
 	// Create
 	router.Post(fmt.Sprintf("%s/", os.Getenv("SITE_PREFIX")), permissions.Create)
 
-	// Retrieve
-	// router.Get(fmt.Sprintf("%s/", os.Getenv("SITE_PREFIX")), permissions.RetrieveAll)
+	// permissions
+	router.Route(fmt.Sprintf("%s/permissions", os.Getenv("SITE_PREFIX")), func(r chi.Router) {
+		r.Route("/{identityID}", func(r chi.Router) {
+			r.Delete("/", permissions.Delete)
+			r.Get("/", permissions.Retrieve)
+			r.Put("/", permissions.Update)
 
-	// System
-	// router.Route(fmt.Sprintf("%s/system/{permissionID}", os.Getenv("SITE_PREFIX")), func(r chi.Router) {
-	// 	r.Get("/", permissions.RetrieveSystem)
-	// 	r.Put("/", permissions.UpdateSystem)
-	// 	r.Delete("/", permissions.DeleteSystem)
-	// })
-
-	// User
-	// router.Route(fmt.Sprintf("%s/user/{permissionID}", os.Getenv("SITE_PREFIX")), func(r chi.Router) {
-	// 	r.Get("/", permissions.RetrieveUser)
-	// 	r.Put("/", permissions.UpdateUser)
-	// 	r.Delete("/", permissions.DeleteUser)
-	// })
+			r.Route("/allowed", func(r chi.Router) {
+				r.Route("/{permission}", func(r chi.Router) {
+					r.Get("/", permissions.Allowed)
+				})
+			})
+		})
+	})
 
 	return router
+}
+
+func identityCTX(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		identityID := chi.URLParam(r, "identityID")
+		ctx := context.WithValue(r.Context(), "identity", identityID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
