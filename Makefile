@@ -6,12 +6,12 @@ export GOARCH=amd64
 
 LDFLAGS := -X "main.Version=$(VERSION)" -X "main.Build=$(shell git rev-parse --short=7 HEAD)"
 TAGS ?=
-SERVICENAME ?= "identity"
+SERVICENAME ?= "permissions"
 DD := "docker"
 
 .PHONY: all
 all:
-	go build -o $(SERVICENAME) $(LDFLAGS)
+	go build -o $(SERVICE_NAME) $(LDFLAGS)
 
 .PHONY: all
 clean:
