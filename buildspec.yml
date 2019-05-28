@@ -7,6 +7,18 @@ phases:
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
   build:
     commands:
+      - echo $AWS_ECR
+      - echo $COMMIT_HASH
+      - echo $IMAGE_TAG
+      - echo $AWS_DB_REGION
+      - echo $AWS_DB_ENDPOINT
+      - echo $AWS_DB_TABLE
+      - echo $AWS_ACCESS_KEY_ID
+      - echo $AWS_SECRET_ACCESS_KEY
+      - echo $DATABASE_DYNAMO
+      - echo $SITE_PREFIX
+      - echo $SERVICE_NAME
+      - echo $SERVICE_DEPENDENCIES
       - docker build -t $AWS_ECR/permissions:latest
         --build-arg build=$COMMIT_HASH
         --build-arg version=$IMAGE_TAG
