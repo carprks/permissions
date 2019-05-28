@@ -13,6 +13,8 @@ import (
 
 // Routes self explanatory
 func Routes() chi.Router {
+	fmt.Println(fmt.Sprintf("SITE_PREFIX: %s", os.Getenv("SITE_PREFIX")))
+
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
