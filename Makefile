@@ -38,5 +38,6 @@ docker:
 		--build-arg DATABASE_DYNAMO=$(DATABASE_DYNAMO) \
 		--build-arg SERVICE_NAME=$(SERVICENAME) \
 		--build-arg SERVICE_DEPENDENCIES=$(SERVICE_DEPENDENCIES) \
+		--build-arg SITE_PREFIX=$(SITE_PREFIX) \
 		-f Dockerfile .
 

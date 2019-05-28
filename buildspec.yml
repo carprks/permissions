@@ -18,6 +18,9 @@ phases:
         --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
         --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
         --build-arg DATABASE_DYNAMO=$DATABASE_DYNAMO
+        --build-arg SITE_PREFIX=$SITE_PREFIX
+        --build-arg SERVICE_NAME=$SERVICE_NAME
+        --build-arg SERVICE_DEPENDENCIES=$SERVICE_DEPENDENCIES
         -f Dockerfile .
       - docker tag $AWS_ECR/permissions:latest $AWS_ECR/permissions:$IMAGE_TAG
   post_build:
