@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// CreateEntry create the permissions
 func (p Permission)CreateEntry() (Permission, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
@@ -52,6 +53,7 @@ func (p Permission)CreateEntry() (Permission, error) {
 	return p, nil
 }
 
+// RetrieveEntry get the permissions
 func (p Permission)RetrieveEntry() (Permission, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
@@ -77,6 +79,7 @@ func (p Permission)RetrieveEntry() (Permission, error) {
 	return convertDynamoToPermission(result.Item)
 }
 
+// UpdateEntry alter the permissions
 func (p Permission)UpdateEntry(n Permission) (Permission, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
@@ -114,6 +117,7 @@ func (p Permission)UpdateEntry(n Permission) (Permission, error) {
 	return convertDynamoToPermission(ret.Attributes)
 }
 
+// DeleteEntry remove the permissions
 func (p Permission)DeleteEntry() (Permission, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
@@ -139,6 +143,7 @@ func (p Permission)DeleteEntry() (Permission, error) {
 	return Permission{}, nil
 }
 
+// ScanEntries get all the permisisons
 func ScanEntries() ([]Permission, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),

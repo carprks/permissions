@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Retrieve get all the permissions
 func Retrieve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -30,6 +31,7 @@ func Retrieve(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Allowed can we do this action
 func Allowed(w http.ResponseWriter, r *http.Request) {
 	identity := chi.URLParam(r, "identityID")
 	permission := chi.URLParam(r, "permission")

@@ -1,18 +1,17 @@
 package src
 
 import (
-	"context"
 	"fmt"
 	"github.com/carprks/permissions/src/permissions"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/keloran/go-healthcheck"
 	"github.com/keloran/go-probe"
-	"net/http"
 	"os"
 	"time"
 )
 
+// Routes self explanatory
 func Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -47,12 +46,4 @@ func Routes() chi.Router {
 	})
 
 	return router
-}
-
-func identityCTX(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		identityID := chi.URLParam(r, "identityID")
-		ctx := context.WithValue(r.Context(), "identity", identityID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }

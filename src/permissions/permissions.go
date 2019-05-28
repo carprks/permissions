@@ -16,13 +16,13 @@ type PermissionResponse struct {
 	Error      error      `json:"error,omitempty"`
 }
 
-// Permissions struct
+// Permission struct
 type Permission struct {
 	Identity    string        `json:"identity"`
 	Permissions []Permissions `json:"permissions"`
 }
 
-// Permission struct
+// Permissions struct
 type Permissions struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
@@ -54,6 +54,7 @@ func (pr PermissionRequest) getCompanyUUID() string {
 // PermissionAstrix in-case we want a different wildcard
 const PermissionAstrix = "*"
 
+// ErrorResponse boilerplate
 func ErrorResponse(w http.ResponseWriter, e error) {
 	w.WriteHeader(http.StatusBadRequest)
 	fmt.Println(fmt.Sprintf("err: %v", e))

@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Delete the permission
 func Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
