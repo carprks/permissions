@@ -7,7 +7,6 @@ script:
     --build-arg build=$TRAVIS_COMMIT
     --build-arg version=$TRAVIS_COMMIT
     --build-arg serviceName=$APP
-    --build-arg AWS_ECR=$AWS_ECR
     --build-arg AWS_DB_REGION=$AWS_DB_REGION
     --build-arg AWS_DB_ENDPOINT=$AWS_DB_ENDPOINT
     --build-arg AWS_DB_TABLE=$AWS_DB_TABLE
@@ -19,5 +18,6 @@ script:
     --build-arg SERVICE_DEPENDENCIES=$SERVICE_DEPENDENCIES
     -f Dockerfile .
 after_success:
+  - docker images
   - bash .travis-deploy/docker.sh
   - bash .travis-deploy/deploy.sh

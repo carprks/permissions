@@ -9,6 +9,6 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         docker tag "$APP:latest" "$AWS_ECR/$APP:$TRAVIS_COMMIT"
         docker tag "$APP:latest" "$AWS_ECR:$APP:latest"
         docker push "$AWS_ECR/$APP:$TRAVIS_COMMIT"
-        docker push "$AWS_ECR/$APP:latest'
+        docker push "$AWS_ECR/$APP:latest"
     fi
 fi
