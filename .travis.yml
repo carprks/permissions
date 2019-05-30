@@ -19,5 +19,7 @@ script:
     --build-arg SERVICE_DEPENDENCIES=$SERVICE_DEPENDENCIES
     -f Dockerfile .
 after_success:
+  - ls .
+  - ls .travis-deploy
   - .travis-deploy/docker.sh
   - .travis-deploy/deploy.sh
