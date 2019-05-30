@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-
-echo "TravisPullRequest: $TRAVIS_PULL_REQUEST"
-echo "TravisBranch: $TRAVIS_BRANCH"
-
 if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker --version
