@@ -1,22 +1,18 @@
 sudo: required
-language: bash
+language: go
 services:
   - docker
+go:
+  - 1.12.5
+env:
+  - GO111MODULE=on
+install:
+  - pip install --user awscli
 script:
-  - docker build -t $APP:latest
-    --build-arg build=$TRAVIS_COMMIT
-    --build-arg version=$TRAVIS_COMMIT
-    --build-arg serviceName=$APP
-    --build-arg AWS_DB_REGION=$AWS_DB_REGION
-    --build-arg AWS_DB_ENDPOINT=$AWS_DB_ENDPOINT
-    --build-arg AWS_DB_TABLE=$AWS_DB_TABLE
-    --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-    --build-arg DATABASE_DYNAMO=$DATABASE_DYNAMO
-    --build-arg SITE_PREFIX=$SITE_PREFIX
-    --build-arg SERVICE_NAME=$SERVICE_NAME
-    --build-arg SERVICE_DEPENDENCIES=$SERVICE_DEPENDENCIES
-    -f Dockerfile .
-after_success:
+  - go mod downlaod
+  - go get -u golang.org/x/lint/golint
+  - golint --set-exit-status ./...
+  - go build .
+after_script:
   - bash .travis-deploy/docker.sh
-  - bash .travis-deploy/deploy.sh
+  - bash .travis-deploy/cloud.sh

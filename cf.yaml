@@ -1,0 +1,281 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Login Service"
+
+Parameters:
+  ServiceName:
+    Type: String
+  Environment:
+    Type: String
+  DomainName:
+    Type: String
+  AuthorizerARN:
+    Type: String
+  Stage:
+    Type: String
+    Default: v1
+  CertificateARN:
+    Type: String
+  DNSZoneName:
+    Type: String
+  BuildBucket:
+    Type: String
+  BuildKey:
+    Type: String
+  ImageURI:
+    Type: String
+
+Resources:
+  Dynamo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['-', [!Ref ServiceName, dynamo, !Ref Environment]]
+      AttributeDefinitions:
+        - AttributeName: ID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ID
+          KeyType: HASH
+      ProvisionedThroughput:
+        WriteCapacityUnits: 5
+        ReadCapacityUnits: 5
+
+  AuthorizerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref ServiceName, authorizerrole, !Ref Environment]]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: lambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:invokeFunction
+                Resource: !Ref AuthorizerARN
+
+  Authorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Join ['-', [!Ref ServiceName, authorizer, !Ref Environment]]
+      RestApiId: !Ref RestAPI
+      AuthorizerCredentials: !GetAtt AuthorizerRole.Arn
+      AuthorizerResultTtlInSeconds: 0
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerARN}/invocations
+      Type: REQUEST
+      IdentitySource: !Sub method.request.header.X-Authorization
+
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Join ['-', [!Ref ServiceName, restapi, !Ref Environment]]
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  RestAPIResourceProbe:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: probe
+  RestAPIResourceProbeGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIResourceProbe
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: GET
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: |
+            {"statusCode": 200}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: |
+                {}
+      MethodResponses:
+        - StatusCode: 200
+
+  RestAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: RestAPIResourceProbeGet
+    Properties:
+      RestApiId: !Ref RestAPI
+
+  RestAPIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestAPI
+      StageName: !Ref Stage
+      DeploymentId: !Ref RestAPIDeployment
+
+  RestAPIDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Ref DomainName
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !Ref CertificateARN
+
+  RestAPIDomainMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      BasePath: !Ref Stage
+      DomainName: !Ref RestAPIDomainName
+      RestApiId: !Ref RestAPI
+      Stage: !Ref RestAPIStage
+
+  PrimaryRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref DomainName
+      Type: A
+      HostedZoneName: !Ref DNSZoneName
+      Weight: 1
+      SetIdentifier: !Join ['-', [!Ref ServiceName, recordset, !Ref Environment, !Ref 'AWS::Region']]
+      AliasTarget:
+        HostedZoneId: !GetAtt RestAPIDomainName.RegionalHostedZoneId
+        DNSName: !GetAtt RestAPIDomainName.RegionalDomainName
+        EvaluateTargetHealth: false
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref ServiceName, taskrole, !Ref Environment]]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: ecs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 's3:Get*'
+                  - 's3:List*'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName:
+                      - replication.dynamodb.amazonaws.com
+                      - dax.amazonaws.com
+                      - dynamodb.application-autoscaling.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: '*'
+                Condition:
+                  StringLike:
+                    iam:PassedToService:
+                      - application-autoscaling.amazonaws.com
+                      - dax.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                  - dax:*
+                  - application-autoscaling:DeleteScalingPolicy
+                  - application-autoscaling:DeregisterScalableTarget
+                  - application-autoscaling:DescribeScalableTargets
+                  - application-autoscaling:DescribeScalingActivities
+                  - application-autoscaling:DescribeScalingPolicies
+                  - application-autoscaling:PutScalingPolicy
+                  - application-autoscaling:RegisterScalableTarget
+                  - cloudwatch:DeleteAlarms
+                  - cloudwatch:DescribeAlarmHistory
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DescribeAlarmsForMetric
+                  - cloudwatch:GetMetricStatistics
+                  - cloudwatch:ListMetrics
+                  - cloudwatch:PutMetricAlarm
+                  - iam:GetRole
+                  - iam:ListRoles
+                  - resource-groups:ListGroups
+                  - resource-groups:ListGroupResources
+                  - resource-groups:GetGroup
+                  - resource-groups:GetGroupQuery
+                  - resource-groups:CreateGroup
+                  - tag:GetResources"
+                Resource: '*'
+
+  PermissionsTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: AWS_DB_ENDPOINT
+              Value: !Join ['', ['http://', 'dynamodb.', !Ref 'AWS::Region', '.amazonaws.com']]
+            - Name: AWS_DB_REGION
+              Value: !Ref AWS::Region
+            - Name: AWS_DB_TABLE
+              Value: !Ref Dynamo
+            - Name: DATABASE_DYNAMO
+              Value: true
+            - Name: PORT
+              Value: 80
+            - Name: SERVICE_NAME
+              Value: !Ref ServiceName
+            - Name: SITE_PREFIX
+              Value: !Join ['', ['/', !Ref ServiceName]]
+          Essential: true
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - curl --silent --fail localhost/probe || exit 1
+            Interval: 60
+            Retries: 10
+            StartPeriod: 60
+            Timeout: 10
+          Image: !Ref ImageURI
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Join ['/', ['/ecs', !Ref ServiceName]]
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: 'ecs'
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: tcp
+          Name: !Ref ServiceName
+      Cpu: 256
+      ExecutionRoleArn: !GetAtt TaskRole.Arn
+      Family: !Ref ServiceName
+      Memory: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt TaskRole.Arn
