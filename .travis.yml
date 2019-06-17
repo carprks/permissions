@@ -9,7 +9,7 @@ env:
 install:
   - pip install --user awscli
 script:
-  - go mod downlaod
+  - go mod download
   - go get -u golang.org/x/lint/golint
   - golint -set_exit_status ./...
   - go build .
