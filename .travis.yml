@@ -11,7 +11,7 @@ install:
 script:
   - go mod downlaod
   - go get -u golang.org/x/lint/golint
-  - golint --set-exit-status ./...
+  - golint -set-exit-status ./...
   - go build .
 after_script:
   - bash .travis-deploy/docker.sh
