@@ -23,6 +23,14 @@ Parameters:
     Type: String
   ImageURI:
     Type: String
+  Priority:
+    Type: Number
+    Default: 1
+  DesiredCount:
+    Type: Number
+    Default: 1
+  LoadBalancerAddress:
+    Type: String
 
 Resources:
   Dynamo:
@@ -80,38 +88,156 @@ Resources:
         Types:
           - REGIONAL
 
-  RestAPIResourceProbe:
+  RestAPIHealthCheck:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref RestAPI
       ParentId: !GetAtt RestAPI.RootResourceId
-      PathPart: probe
-  RestAPIResourceProbeGet:
+      PathPart: healthcheck
+  RestAPIHealthCheckGet:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIResourceProbe
+      ResourceId: !Ref RestAPIHealthCheck
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: GET
       RequestParameters:
         method.request.header.X-Authorization: true
       Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
+
+  RestAPICreatePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !GetAtt RestAPI.RootResourceId
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: POST
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: POST
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName]]
+
+  RestAPIPermissions:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: permissions
+  RestAPIIdentity:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !Ref RestAPIPermissions
+      PathPart: '{identity}'
+  RestAPIIdentityDelete:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIIdentity
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: DELETE
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: DELETE
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+  RestAPIIdentityGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIIdentity
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: GET
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+  RestAPIIdentityOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIIdentity
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        ConnectionType: INTERNET
+        IntegrationResponse:
+          - ResponseTemplates:
+              application/json: "{\"message\": \"OK\"}"
+            StatusCode: 200
         Type: MOCK
-        RequestTemplates:
-          application/json: |
-            {"statusCode": 200}
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseTemplates:
-              application/json: |
-                {}
-      MethodResponses:
-        - StatusCode: 200
+  RestAPIIdentityPut:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIIdentity
+      HttpMethod: PUT
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: PUT
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+
+  RestAPIAllowed:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !Ref RestAPIIdentity
+      PathPart: allowed
+  RestAPIAllowedPermission:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !Ref RestAPIAllowed
+      PathPart: '{permission}'
+  RestAPIAllowedPermissionGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIAllowedPermission
+      HttpMethod: GET
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      RequestParameters:
+        method.request.header.X-Authorization: true
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}']]
+  RestAPIAllowedPermissionOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIAllowedPermission
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        ConnectionType: INTERNET
+        IntegrationResponse:
+          - ResponseTemplates:
+              application/json: "{\"message\": \"OK\"}"
+            StatusCode: 200
+        Type: MOCK
+
 
   RestAPIDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: RestAPIResourceProbeGet
+    DependsOn: RestAPIHealthCheckGet
     Properties:
       RestApiId: !Ref RestAPI
 
@@ -279,3 +405,70 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       TaskRoleArn: !GetAtt TaskRole.Arn
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      TargetType: ip
+      Name: !Join ['-', [!Ref ServiceName, targetgroup, !Ref Environment]]
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn:ImportValue:
+          !Join [':', [carprk, VPCId]]
+
+  LoadBalancerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref TargetGroup
+          Type: forward
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - !Join ['/', ['', !Ref ServiceName]]
+      ListenerArn:
+        Fn::ImportValue:
+          !Join [':', [carprk, publiclistener, !Ref Environment]]
+      Priority: !Ref Priority
+
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: carprk
+
+  PermissionService:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerRule
+    Properties:
+      Cluster: !Ref Cluster
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: !Ref DesiredCount
+      HealthCheckGracePeriodSeconds: 5
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: !Ref ServiceName
+          ContainerPort: 80
+          TargetGroupArn: !Ref TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Fn::ImportValue
+              !Join [':', [carprk, FargateContainerSecurityGroup, !Ref Environment]]
+          Subnets:
+            - Fn::ImportValue
+              !Join [':', [carprk, PublicSubnetOne]]
+            - Fn::ImportValue
+              !Join [':', [carprk, PublicSubnetTwo]]
+            - Fn::ImportValue
+              !Join [':', [carprk, PublicSubnetThree]]
+      TaskDefinition: !Ref PermissionsTask
