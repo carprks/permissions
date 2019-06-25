@@ -57,7 +57,7 @@ cloudFormation()
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
                 ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
-                ParameterKey=SubnetOne,ParamterValue=$AWS_SUBNET_ONE \
+                ParameterKey=SubnetOne,ParameterValue=$AWS_SUBNET_ONE \
                 ParameterKey=SubnetTwo,ParameterValue=$AWS_SUBNET_TWO \
                 ParameterKey=SubnetThree,ParameterValue=$AWS_SUBNET_THREE
     else
@@ -79,7 +79,7 @@ cloudFormation()
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
                 ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
-                ParameterKey=SubnetOne,ParamterValue=$AWS_SUBNET_ONE \
+                ParameterKey=SubnetOne,ParameterValue=$AWS_SUBNET_ONE \
                 ParameterKey=SubnetTwo,ParameterValue=$AWS_SUBNET_TWO \
                 ParameterKey=SubnetThree,ParameterValue=$AWS_SUBNET_THREE
     fi
