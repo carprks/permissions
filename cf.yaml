@@ -467,9 +467,6 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
-          SecurityGroups:
-            - Fn::ImportValue
-              !Join [':', [carprk, FargateContainerSecurityGroup, !Ref Environment]]
           Subnets:
             - !Ref SubnetOne
             - !Ref SubnetTwo
