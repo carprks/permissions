@@ -427,7 +427,7 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 5
+      HealthCheckIntervalSeconds: 30
       HealthCheckPath: /probe
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 4
@@ -448,9 +448,22 @@ Resources:
       Conditions:
         - Field: path-pattern
           Values:
-            - !Join ['/', ['', !Ref ServiceName]]
+            - !Sub "/${ServiceName}*"
       ListenerArn: !Ref LoadBalancerListenerArn
       Priority: !Ref Priority
+
+  SecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ['-', [!Ref ServiceName, securitygroup, !Ref Environment]]
+      GroupName: !Join ['-', [!Ref ServiceName, securitygroup, !Ref Environment]]
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: tcp
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          CidrIp: '0.0.0.0/0'
 
   PermissionService:
     Type: AWS::ECS::Service
@@ -470,6 +483,8 @@ Resources:
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref SecGroup
           Subnets:
             - !Ref SubnetOne
             - !Ref SubnetTwo
