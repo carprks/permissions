@@ -33,6 +33,8 @@ Parameters:
     Type: String
   LoadBalancerListenerArn:
     Type: String
+  VPCId:
+    Type: String
 
 Resources:
   Dynamo:
@@ -421,9 +423,7 @@ Resources:
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
-      VpcId:
-        Fn::ImportValue:
-          !Join [':', [carprk, VPCId]]
+      VpcId: !Ref VPCId
 
   LoadBalancerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
