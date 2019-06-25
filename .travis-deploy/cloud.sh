@@ -53,7 +53,7 @@ cloudFormation()
                 ParameterKey=AuthorizerARN,ParameterValue="$AUTHORIZER_ARN" \
                 ParameterKey=CertificateARN,ParameterValue="$CERTIFICATE_ARN" \
                 ParameterKey=DNSZoneName,ParameterValue="$DNS_ZONE_NAME". \
-                ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
+                ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$SERVICE_NAME:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
                 ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
@@ -75,7 +75,7 @@ cloudFormation()
                 ParameterKey=AuthorizerARN,ParameterValue="$AUTHORIZER_ARN" \
                 ParameterKey=CertificateARN,ParameterValue="$CERTIFICATE_ARN" \
                 ParameterKey=DNSZoneName,ParameterValue="$DNS_ZONE_NAME". \
-                ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
+                ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$SERVICE_NAME:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
                 ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
