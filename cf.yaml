@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Login Service"
+Description: "Permissions Service"
 
 Parameters:
   ServiceName:
@@ -420,7 +420,7 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 2
       VpcId:
-        Fn:ImportValue:
+        Fn::ImportValue:
           !Join [':', [carprk, VPCId]]
 
   LoadBalancerRule:
