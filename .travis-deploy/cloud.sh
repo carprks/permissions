@@ -55,7 +55,7 @@ cloudFormation()
                 ParameterKey=DNSZoneName,ParameterValue="$DNS_ZONE_NAME". \
                 ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
-                ParameterKey=LoadBalancerListnerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN
+                ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN
     else
         AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws cloudformation update-stack \
             --template-url https://"$S3_FOLDER".s3."$AWS_REGION".amazonaws.com/"$SERVICE_NAME"/cf.yaml \
@@ -73,7 +73,7 @@ cloudFormation()
                 ParameterKey=DNSZoneName,ParameterValue="$DNS_ZONE_NAME". \
                 ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
-                ParameterKey=LoadBalancerListnerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN
+                ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN
     fi
 }
 
