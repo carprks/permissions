@@ -41,6 +41,9 @@ Parameters:
     Type: String
   SubnetThree:
     Type: String
+  Cluster:
+    Type: String
+    Default: carprk
 
 Resources:
   Dynamo:
@@ -443,11 +446,6 @@ Resources:
             - !Join ['/', ['', !Ref ServiceName]]
       ListenerArn: !Ref LoadBalancerListenerArn
       Priority: !Ref Priority
-
-  Cluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: carprk
 
   PermissionService:
     Type: AWS::ECS::Service
