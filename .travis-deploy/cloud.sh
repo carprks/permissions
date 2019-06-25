@@ -5,7 +5,7 @@ cloudFormationInProgress()
 {
     STACK_NAME=$SERVICE_NAME-$DEPLOY_ENV
 
-    STACK_ROLLBACK=$(AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" aws cloudformation list-stacks --region "$AWS_REGION" --stack-status-filter DELETE_IN_PROGRESS ROLLBACK_IN_PROGRESS CREATE_IN_PROGRESS | jq '.StackSummaries[].StackName//empty' | grep "$STACK_NAME")
+    STACK_ROLLBACK=$(AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" aws cloudformation list-stacks --region "$AWS_REGION" --stack-status-filter DELETE_IN_PROGRESS ROLLBACK_IN_PROGRESS CREATE_IN_PROGRESS UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS UPDATE_IN_PROGRESS UPDATE_COMPLETE_CLEANUP_IN_PROGRESS UPDATE_ROLLBACK_IN_PROGRESS | jq '.StackSummaries[].StackName//empty' | grep "$STACK_NAME")
     if [[ -z "$STACK_ROLLBACK" ]] || [[ "$STACK_ROLLBACK" == "" ]]; then
         echo ""$STACK_NAME" not in progress"
     else
