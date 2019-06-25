@@ -31,6 +31,8 @@ Parameters:
     Default: 1
   LoadBalancerAddress:
     Type: String
+  LoadBalancerListenerArn:
+    Type: String
 
 Resources:
   Dynamo:
@@ -433,9 +435,7 @@ Resources:
         - Field: path-pattern
           Values:
             - !Join ['/', ['', !Ref ServiceName]]
-      ListenerArn:
-        Fn::ImportValue:
-          !Join [':', [carprk, publiclistener, !Ref Environment]]
+      ListenerArn: !Ref LoadBalancerListenerArn
       Priority: !Ref Priority
 
   Cluster:
