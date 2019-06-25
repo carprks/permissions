@@ -19,7 +19,7 @@ cloudFormationDelete()
 {
     STACK_NAME=$SERVICE_NAME-$DEPLOY_ENV
 
-    STACK_ROLLBACK=$(AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" aws cloudformation list-stacks --region "$AWS_REGION" --stack-status-filter ROLLBACK_COMPLETE UPDATE_ROLLBACK_COMPLETE | jq '.StackSummaries[].StackName//empty' | grep "$STACK_NAME")
+    STACK_ROLLBACK=$(AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" aws cloudformation list-stacks --region "$AWS_REGION" --stack-status-filter ROLLBACK_COMPLETE | jq '.StackSummaries[].StackName//empty' | grep "$STACK_NAME")
     if [[ -z "$STACK_ROLLBACK" ]] || [[ "$STACK_ROLLBACK" == "" ]]; then
         echo ""$STACK_NAME" in good state"
     else
