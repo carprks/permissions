@@ -177,7 +177,7 @@ Resources:
       AuthorizationType: NONE
       Integration:
         ConnectionType: INTERNET
-        IntegrationResponse:
+        IntegrationResponses:
           - ResponseTemplates:
               application/json: "{\"message\": \"OK\"}"
             StatusCode: 200
