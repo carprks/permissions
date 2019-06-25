@@ -35,6 +35,12 @@ Parameters:
     Type: String
   VPCId:
     Type: String
+  SubnetOne:
+    Type: String
+  SubnetTwo:
+    Type: String
+  SubnetThree:
+    Type: String
 
 Resources:
   Dynamo:
@@ -465,10 +471,7 @@ Resources:
             - Fn::ImportValue
               !Join [':', [carprk, FargateContainerSecurityGroup, !Ref Environment]]
           Subnets:
-            - Fn::ImportValue
-              !Join [':', [carprk, PublicSubnetOne]]
-            - Fn::ImportValue
-              !Join [':', [carprk, PublicSubnetTwo]]
-            - Fn::ImportValue
-              !Join [':', [carprk, PublicSubnetThree]]
+            - !Ref SubnetOne
+            - !Ref SubnetTwo
+            - !Ref SubnetThree
       TaskDefinition: !Ref PermissionsTask

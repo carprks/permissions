@@ -56,7 +56,10 @@ cloudFormation()
                 ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
-                ParameterKey=VPCId,ParameterValue=$AWS_VPCID
+                ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
+                ParameterKey=SubnetOne,ParamterValue=$AWS_SUBNET_ONE \
+                ParameterKey=SubnetTwo,ParameterValue=$AWS_SUBNET_TWO \
+                ParameterKey=SubnetThree,ParameterValue=$AWS_SUBNET_THREE
     else
         AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY aws cloudformation update-stack \
             --template-url https://"$S3_FOLDER".s3."$AWS_REGION".amazonaws.com/"$SERVICE_NAME"/cf.yaml \
@@ -75,7 +78,10 @@ cloudFormation()
                 ParameterKey=ImageURI,ParameterValue=$AWS_ECR/$APP:$TRAVIS_COMMIT \
                 ParameterKey=LoadBalancerAddress,ParameterValue=$AWS_LOADBALANCER_ADDRESS \
                 ParameterKey=LoadBalancerListenerArn,ParameterValue=$AWS_LOADBALANCER_LISTENER_ARN \
-                ParameterKey=VPCId,ParameterValue=$AWS_VPCID
+                ParameterKey=VPCId,ParameterValue=$AWS_VPCID \
+                ParameterKey=SubnetOne,ParamterValue=$AWS_SUBNET_ONE \
+                ParameterKey=SubnetTwo,ParameterValue=$AWS_SUBNET_TWO \
+                ParameterKey=SubnetThree,ParameterValue=$AWS_SUBNET_THREE
     fi
 }
 
@@ -97,6 +103,9 @@ if [[ -z "$TRAVIS_PULL_REQUEST" ]] || [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; t
     AWS_VPCID=$DEV_AWS_VPCID
     AWS_LOADBALANCER_ADDRESS=$DEV_AWS_LOADBALANCER_ADDRESS
     AWS_LOADBALANCER_LISTENER_ARN=$DEV_AWS_LOADBALANCER_LISTERNER_ARN
+    AWS_SUBNET_ONE=$DEV_AWS_SUBNET_ONE
+    AWS_SUBNET_TWO=$DEV_AWS_SUBNET_TWO
+    AWS_SUBNET_THREE=$DEV_AWS_SUBNET_THREE
 
     echo "Deploy Dev"
     deployIt
