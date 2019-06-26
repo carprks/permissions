@@ -459,9 +459,7 @@ Resources:
       GroupName: !Join ['-', [!Ref ServiceName, securitygroup, !Ref Environment]]
       SecurityGroupEgress:
         - CidrIp: '0.0.0.0/0'
-          IpProtocol: tcp
-          FromPort: 0
-          ToPort: 65535
+          IpProtocol: -1
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
