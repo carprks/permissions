@@ -124,7 +124,7 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates:
-              application/json: {}
+              application/json: !Join ['\n', ['{', '}']]
 
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
