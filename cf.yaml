@@ -153,6 +153,9 @@ Resources:
         - StatusCode: 201
           ResponseModels:
             application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
@@ -186,6 +189,9 @@ Resources:
         - StatusCode: 200
           ResponseModels:
             application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
@@ -206,6 +212,9 @@ Resources:
         method.request.path.identity: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 400
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:
@@ -247,6 +256,9 @@ Resources:
         - StatusCode: 202
           ResponseModels:
             application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
@@ -281,6 +293,9 @@ Resources:
         method.request.path.permission: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 403
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:

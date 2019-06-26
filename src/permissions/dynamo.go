@@ -42,6 +42,9 @@ func (p Permission)CreateEntry() (Permission, error) {
 			switch awsErr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
 				return Permission{}, fmt.Errorf("permission identity already exists: %v", awsErr)
+			case "ValidationException":
+				fmt.Println(fmt.Sprintf("validation err reason: %v", input))
+				return Permission{}, fmt.Errorf("validation error: %v", awsErr)
 			default:
 				fmt.Println(fmt.Sprintf("unknown code err reason: %v", input))
 				return Permission{}, fmt.Errorf("unknown code err: %v", awsErr)
