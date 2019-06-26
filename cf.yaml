@@ -123,8 +123,6 @@ Resources:
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
         IntegrationResponses:
           - StatusCode: 200
-            ResponseTemplates:
-              - application/json: Empty
 
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
