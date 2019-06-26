@@ -115,8 +115,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: GET
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
       Integration:
@@ -125,6 +123,8 @@ Resources:
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
         IntegrationResponses:
           - StatusCode: 200
+            ResponseTemplates:
+              - application/json: Empty
 
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
