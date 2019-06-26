@@ -180,6 +180,8 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: DELETE
+      RequestParameters:
+        method.request.path.identity: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -187,8 +189,6 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
-        RequestParameters:
-          method.request.path.identity: true
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
         IntegrationResponses:
           - StatusCode: 200
@@ -200,6 +200,8 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: GET
+      RequestParameters:
+        method.request.path.identity: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -207,8 +209,6 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        RequestParameters:
-          method.request.path.identity: true
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
         IntegrationResponses:
           - StatusCode: 200
@@ -234,6 +234,8 @@ Resources:
       HttpMethod: PUT
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
+      RequestParameters:
+        method.request.path.identity: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -244,8 +246,6 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
-        RequestParameters:
-          method.request.path.identity: true
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
         IntegrationResponses:
           - StatusCode: 200
@@ -270,6 +270,9 @@ Resources:
       HttpMethod: GET
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
+      RequestParameters:
+        method.request.path.identity: true
+        method.request.path.permission: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -278,9 +281,6 @@ Resources:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
-        RequestParameters:
-          method.request.path.identity: true
-          method.request.path.permission: true
         IntegrationResponses:
           - StatusCode: 200
   RestAPIAllowedPermissionOptions:
