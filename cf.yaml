@@ -101,6 +101,18 @@ Resources:
         Types:
           - REGIONAL
 
+  EmptyModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      ContentType: application/json
+      Name: EmptyModel
+      RestApiId: !Ref RestAPI
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: Empty
+        type: object
+
+
   RestAPIHealthCheck:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -117,14 +129,14 @@ Resources:
       HttpMethod: GET
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
         IntegrationResponses:
           - StatusCode: 200
-            ResponseTemplates:
-              application/json: !Join ['\n', ['{', '}']]
 
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
