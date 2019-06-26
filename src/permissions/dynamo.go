@@ -43,6 +43,7 @@ func (p Permission)CreateEntry() (Permission, error) {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
 				return Permission{}, fmt.Errorf("permission identity already exists: %v", awsErr)
 			default:
+				fmt.Println(fmt.Sprintf("unknown code err reason: %v", input))
 				return Permission{}, fmt.Errorf("unknown code err: %v", awsErr)
 			}
 		} else {
