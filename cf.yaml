@@ -117,10 +117,14 @@ Resources:
       HttpMethod: GET
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
+        IntegrationResponses:
+          - StatusCode: 200
 
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
@@ -132,10 +136,14 @@ Resources:
       HttpMethod: POST
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName]]
+        IntegrationResponses:
+          - StatusCode: 200
 
   RestAPIPermissions:
     Type: AWS::ApiGateway::Resource
@@ -159,10 +167,14 @@ Resources:
       HttpMethod: DELETE
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+        IntegrationResponses:
+          - StatusCode: 200
   RestAPIIdentityGet:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -173,10 +185,14 @@ Resources:
       HttpMethod: GET
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+        IntegrationResponses:
+          - StatusCode: 200
   RestAPIIdentityOptions:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -201,10 +217,14 @@ Resources:
       AuthorizerId: !Ref Authorizer
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}']]
+        IntegrationResponses:
+          - StatusCode: 200
 
   RestAPIAllowed:
     Type: AWS::ApiGateway::Resource
@@ -228,10 +248,14 @@ Resources:
       AuthorizerId: !Ref Authorizer
       RequestParameters:
         method.request.header.X-Authorization: true
+      MethodResponses:
+        - StatusCode: 200
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}']]
+        IntegrationResponses:
+          - StatusCode: 200
   RestAPIAllowedPermissionOptions:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -346,29 +370,92 @@ Resources:
                 Action:
                   - dynamodb:*
                   - dax:*
-                  - application-autoscaling:DeleteScalingPolicy
-                  - application-autoscaling:DeregisterScalableTarget
-                  - application-autoscaling:DescribeScalableTargets
-                  - application-autoscaling:DescribeScalingActivities
-                  - application-autoscaling:DescribeScalingPolicies
-                  - application-autoscaling:PutScalingPolicy
-                  - application-autoscaling:RegisterScalableTarget
-                  - cloudwatch:DeleteAlarms
-                  - cloudwatch:DescribeAlarmHistory
-                  - cloudwatch:DescribeAlarms
-                  - cloudwatch:DescribeAlarmsForMetric
-                  - cloudwatch:GetMetricStatistics
-                  - cloudwatch:ListMetrics
-                  - cloudwatch:PutMetricAlarm
+                  - application-autoscaling:*
+                  - cloudwatch:*
                   - iam:GetRole
                   - iam:ListRoles
-                  - resource-groups:ListGroups
-                  - resource-groups:ListGroupResources
-                  - resource-groups:GetGroup
-                  - resource-groups:GetGroupQuery
-                  - resource-groups:CreateGroup
+                  - resource-groups:*
                   - tag:GetResources"
                 Resource: '*'
+
+#  ScalingRole:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Statement:
+#          - Effect: Allow
+#            Principal:
+#              Service:
+#                - application-autoscaling.amazonaws.com
+#            Action:
+#              - sts:AssumeRole
+#      Path: /
+#      Policies:
+#        - PolicyName: service-autoscaling
+#          PolicyDocument:
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - application-autoscaling:*
+#                  - cloudwatch:DescribeAlarms
+#                  - cloudwatch:PutMetricAlarm
+#                  - ecs:DescribeService
+#                  - ecs:UpdateService
+#                Resource: *
+#
+#  ScalingTarget:
+#    Type: AWS::ApplicationAutoScaling::ScalableTarget
+#    Properties:
+#      MaxCapacity: 10
+#      MinCapacity: 1
+#      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt PermissionService.Name]]
+#      RoleARN: !Ref ScalingRole
+#      ScalableDimension: ecs:service:DesiredCount
+#      ServiceNamespace: ecs
+#
+#  ScaleUp:
+#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+#    Properties:
+#      PolicyName: !Join ['', [!Ref ServiceName, ScaleUp]]
+#      PolicyType: StepScaling
+#      ScalingTargetId: !Ref ScalingTarget
+#      StepScalingPolicyConfiguration:
+#        Cooldown: 60
+#        MetricAggregationType: Average
+#        AdjstmentType: ChangeInCapacity
+#        StepAdjustments:
+#          - MetricIntervalLowerBound: 0
+#            MetricIntervalUpperBound: 100
+#            ScalingAdjustment: 2
+#          - MetricIntervalLowerBound: 100
+#            ScalingAdjustment: 4
+#  ScaleDown:
+#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+#    Properties:
+#      PolicyName: !Join ['', [!Ref ServiceName, ScaleDown]]
+#      PolicyType: StepScaling
+#      ScalingTargetId: !Ref ScalingTarget
+#      StepScalingPolicyConfiguration:
+#        Cooldown: 60
+#        MetricAggregationType: Average
+#        AdjustmentType: ChangeInCapacity
+#        StepAdjustments:
+#          - MetricIntervalUpperBound: -1
+#            MetricIntervalLowerBound: -100
+#            ScalingAdjustment: -1
+#          - MetficIntervalUpperBound: -100
+#            ScalingAdjustment: -2
+#
+#  ServiceCloudwatchAlarm:
+#    Type: AWS::CloudWatch::Alarm
+#    Properties:
+#      AlarmName: !Join ['', [!Ref ServiceName, ScaleDown]]
+#      Namespace: AWS/SQS
+#      MetricName: ApproximateNumberOfMessagesVisible
+#      ComparisonOperator: GreaterThanThreshold
+#      Dimensions:
+#        - Name: QueueName
+#          Value: !Ref
 
   PermissionsTask:
     Type: AWS::ECS::TaskDefinition
