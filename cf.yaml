@@ -51,10 +51,10 @@ Resources:
     Properties:
       TableName: !Join ['-', [!Ref ServiceName, dynamo, !Ref Environment]]
       AttributeDefinitions:
-        - AttributeName: ID
+        - AttributeName: identity
           AttributeType: S
       KeySchema:
-        - AttributeName: ID
+        - AttributeName: identity
           KeyType: HASH
       ProvisionedThroughput:
         WriteCapacityUnits: 5
