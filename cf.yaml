@@ -146,10 +146,11 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: POST
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 201
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:
@@ -179,8 +180,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: DELETE
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -199,8 +198,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: GET
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -233,10 +230,11 @@ Resources:
       HttpMethod: PUT
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 202
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:
@@ -266,8 +264,6 @@ Resources:
       HttpMethod: GET
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      RequestParameters:
-        method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
