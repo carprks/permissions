@@ -150,6 +150,8 @@ Resources:
         method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
@@ -181,6 +183,8 @@ Resources:
         method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
@@ -199,6 +203,8 @@ Resources:
         method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
@@ -231,6 +237,8 @@ Resources:
         method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
@@ -262,6 +270,8 @@ Resources:
         method.request.header.X-Authorization: true
       MethodResponses:
         - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
