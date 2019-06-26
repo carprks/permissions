@@ -277,8 +277,8 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       RequestParameters:
-        integration.request.path.identity: true
-        integration.request.path.permission: true
+        method.request.path.identity: true
+        method.request.path.permission: true
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -288,8 +288,8 @@ Resources:
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
         RequestParameters:
-          method.request.path.identity: method.request.path.identity
-          method.request.path.permission: method.request.path.permission
+          integration.request.path.identity: method.request.path.identity
+          integration.request.path.permission: method.request.path.permission
         IntegrationResponses:
           - StatusCode: 200
   RestAPIAllowedPermissionOptions:
