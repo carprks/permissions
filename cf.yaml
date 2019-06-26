@@ -190,6 +190,8 @@ Resources:
         Type: HTTP
         IntegrationHttpMethod: DELETE
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        RequestParameters:
+          identity: method.request.path.identity
         IntegrationResponses:
           - StatusCode: 200
   RestAPIIdentityGet:
@@ -210,6 +212,8 @@ Resources:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        RequestParameters:
+          identity: method.request.path.identity
         IntegrationResponses:
           - StatusCode: 200
   RestAPIIdentityOptions:
@@ -247,6 +251,8 @@ Resources:
         Type: HTTP
         IntegrationHttpMethod: PUT
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        RequestParameters:
+          identity: method.request.path.identity
         IntegrationResponses:
           - StatusCode: 200
 
@@ -281,6 +287,9 @@ Resources:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
+        RequestParameters:
+          identity: method.request.path.identity
+          permission: method.request.path.permission
         IntegrationResponses:
           - StatusCode: 200
   RestAPIAllowedPermissionOptions:
