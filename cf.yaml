@@ -195,7 +195,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
         RequestParameters:
           integration.request.path.identity: method.request.path.identity
         IntegrationResponses:
@@ -220,7 +220,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
         RequestParameters:
           integration.request.path.identity: method.request.path.identity
         IntegrationResponses:
@@ -262,7 +262,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', '']]
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
         RequestParameters:
           integration.request.path.identity: method.request.path.identity
         IntegrationResponses:
@@ -301,7 +301,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
+        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
         RequestParameters:
           integration.request.path.identity: method.request.path.identity
           integration.request.path.permission: method.request.path.permission
