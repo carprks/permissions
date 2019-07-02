@@ -16,3 +16,4 @@ script:
 after_script:
   - bash .travis-deploy/docker.sh
   - bash .travis-deploy/cloud.sh
+  - bash .travis-deploy/data.sh
