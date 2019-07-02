@@ -342,7 +342,7 @@ Resources:
       DomainName: !Ref DomainName
       EndpointConfiguration:
         Types:
-          - REGIONAL
+          - EDGE
       CertificateArn: !Ref CertificateARN
 
   RestAPIDomainMapping:
