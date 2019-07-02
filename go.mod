@@ -1,7 +1,7 @@
 module github.com/carprks/permissions
 
 require (
-	github.com/aws/aws-sdk-go v1.20.12
+	github.com/aws/aws-sdk-go v1.20.13
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/joho/godotenv v1.3.0
 	github.com/keloran/go-healthcheck v0.0.0-20190520143835-ee510ba46f3a
