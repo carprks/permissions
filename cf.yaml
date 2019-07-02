@@ -343,7 +343,7 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
-      RegionalCertificateArn: !Ref CertificateARN
+      CertificateArn: !Ref CertificateARN
 
   RestAPIDomainMapping:
     Type: AWS::ApiGateway::BasePathMapping
