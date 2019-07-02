@@ -99,7 +99,7 @@ Resources:
       Name: !Join ['-', [!Ref ServiceName, restapi, !Ref Environment]]
       EndpointConfiguration:
         Types:
-          - EDGE
+          - REGIONAL
 
   EmptyModel:
     Type: AWS::ApiGateway::Model
@@ -342,8 +342,8 @@ Resources:
       DomainName: !Ref DomainName
       EndpointConfiguration:
         Types:
-          - EDGE
-      CertificateArn: !Ref CertificateARN
+          - REGIONAL
+      RegionalCertificateArn: !Ref CertificateARN
 
   RestAPIDomainMapping:
     Type: AWS::ApiGateway::BasePathMapping
