@@ -429,84 +429,84 @@ Resources:
                   - tag:GetResources"
                 Resource: '*'
 
-  ScalingRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - application-autoscaling.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: service-autoscaling
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - application-autoscaling:*
-                  - cloudwatch:DescribeAlarms
-                  - cloudwatch:PutMetricAlarm
-                  - ecs:DescribeService
-                  - ecs:UpdateService
-                Resource: *
-
-  ScalingTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    Properties:
-      MaxCapacity: 10
-      MinCapacity: 1
-      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt PermissionService.Name]]
-      RoleARN: !Ref ScalingRole
-      ScalableDimension: ecs:service:DesiredCount
-      ServiceNamespace: ecs
-
-  ScaleUp:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: !Join ['', [!Ref ServiceName, ScaleUp]]
-      PolicyType: StepScaling
-      ScalingTargetId: !Ref ScalingTarget
-      StepScalingPolicyConfiguration:
-        Cooldown: 60
-        MetricAggregationType: Average
-        AdjstmentType: ChangeInCapacity
-        StepAdjustments:
-          - MetricIntervalLowerBound: 0
-            MetricIntervalUpperBound: 100
-            ScalingAdjustment: 2
-          - MetricIntervalLowerBound: 100
-            ScalingAdjustment: 4
-  ScaleDown:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: !Join ['', [!Ref ServiceName, ScaleDown]]
-      PolicyType: StepScaling
-      ScalingTargetId: !Ref ScalingTarget
-      StepScalingPolicyConfiguration:
-        Cooldown: 60
-        MetricAggregationType: Average
-        AdjustmentType: ChangeInCapacity
-        StepAdjustments:
-          - MetricIntervalUpperBound: -1
-            MetricIntervalLowerBound: -100
-            ScalingAdjustment: -1
-          - MetficIntervalUpperBound: -100
-            ScalingAdjustment: -2
-
-  ServiceCloudwatchAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Join ['', [!Ref ServiceName, ScaleDown]]
-      Namespace: AWS/SQS
-      MetricName: ApproximateNumberOfMessagesVisible
-      ComparisonOperator: GreaterThanThreshold
-      Dimensions:
-        - Name: QueueName
-          Value: !Ref
+#  ScalingRole:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Statement:
+#          - Effect: Allow
+#            Principal:
+#              Service:
+#                - application-autoscaling.amazonaws.com
+#            Action:
+#              - sts:AssumeRole
+#      Path: /
+#      Policies:
+#        - PolicyName: service-autoscaling
+#          PolicyDocument:
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - application-autoscaling:*
+#                  - cloudwatch:DescribeAlarms
+#                  - cloudwatch:PutMetricAlarm
+#                  - ecs:DescribeService
+#                  - ecs:UpdateService
+#                Resource: '*'
+#
+#  ScalingTarget:
+#    Type: AWS::ApplicationAutoScaling::ScalableTarget
+#    Properties:
+#      MaxCapacity: 10
+#      MinCapacity: 1
+#      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt PermissionService.Name]]
+#      RoleARN: !Ref ScalingRole
+#      ScalableDimension: ecs:service:DesiredCount
+#      ServiceNamespace: ecs
+#
+#  ScaleUp:
+#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+#    Properties:
+#      PolicyName: !Join ['', [!Ref ServiceName, ScaleUp]]
+#      PolicyType: StepScaling
+#      ScalingTargetId: !Ref ScalingTarget
+#      StepScalingPolicyConfiguration:
+#        Cooldown: 60
+#        MetricAggregationType: Average
+#        AdjstmentType: ChangeInCapacity
+#        StepAdjustments:
+#          - MetricIntervalLowerBound: 0
+#            MetricIntervalUpperBound: 100
+#            ScalingAdjustment: 2
+#          - MetricIntervalLowerBound: 100
+#            ScalingAdjustment: 4
+#  ScaleDown:
+#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+#    Properties:
+#      PolicyName: !Join ['', [!Ref ServiceName, ScaleDown]]
+#      PolicyType: StepScaling
+#      ScalingTargetId: !Ref ScalingTarget
+#      StepScalingPolicyConfiguration:
+#        Cooldown: 60
+#        MetricAggregationType: Average
+#        AdjustmentType: ChangeInCapacity
+#        StepAdjustments:
+#          - MetricIntervalUpperBound: -1
+#            MetricIntervalLowerBound: -100
+#            ScalingAdjustment: -1
+#          - MetficIntervalUpperBound: -100
+#            ScalingAdjustment: -2
+#
+#  ServiceCloudwatchAlarm:
+#    Type: AWS::CloudWatch::Alarm
+#    Properties:
+#      AlarmName: !Join ['', [!Ref ServiceName, ScaleDown]]
+#      Namespace: AWS/SQS
+#      MetricName: ApproximateNumberOfMessagesVisible
+#      ComparisonOperator: GreaterThanThreshold
+#      Dimensions:
+#        - Name: QueueName
+#          Value: !Ref
 
   PermissionsTask:
     Type: AWS::ECS::TaskDefinition
