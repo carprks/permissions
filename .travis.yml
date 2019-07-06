@@ -1,5 +1,16 @@
 sudo: required
 language: go
+notifications:
+  slack:
+    rooms:
+      - carprk:GwNndSzXdf0hncxr2I5cwwsn#builds
+      - carprk:GwNndSzXdf0hncxr2I5cwwsn#permissions
+    on_success: always
+    on_cancel: always
+    on_failure: always
+    on_start: always
+    on_error: always
+    on_pull_requests: true
 services:
   - docker
 go:
