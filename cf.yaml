@@ -25,7 +25,7 @@ Parameters:
     Type: String
   Priority:
     Type: Number
-    Default: 1
+    Default: 2
   DesiredCount:
     Type: Number
     Default: 1
