@@ -195,6 +195,9 @@ func convertPermissionsToDynamo(perms []Permissions) (dynamodb.AttributeValue, e
 			retMap["action"] = &dynamodb.AttributeValue{
 				S: aws.String(perm.Action),
 			}
+			retMap["identifier"] = &dynamodb.AttributeValue{
+			  S: aws.String(perm.Identifier),
+      }
 			mmap := &dynamodb.AttributeValue{
 				M: retMap,
 			}
@@ -222,6 +225,8 @@ func convertDynamoToPermissions(perms *dynamodb.AttributeValue) (Permissions, er
 			ret.Name = *value.S
 		case "action":
 			ret.Action = *value.S
+    case "identifier":
+      ret.Identifier = *value.S
 		}
 	}
 	if ret.Name != "" {

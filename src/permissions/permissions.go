@@ -26,6 +26,7 @@ type Permission struct {
 type Permissions struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
+	Identifier string `json:"identifier"`
 }
 
 // PermissionRequest struct
