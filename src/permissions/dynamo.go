@@ -188,6 +188,10 @@ func convertPermissionsToDynamo(perms []Permissions) (dynamodb.AttributeValue, e
 
 	if len(perms) >= 1 {
 		for _, perm := range perms {
+		  if perm.Identifier == "" {
+		    perm.Identifier = "*"
+      }
+
 			retMap := map[string]*dynamodb.AttributeValue{}
 			retMap["name"] = &dynamodb.AttributeValue{
 				S: aws.String(perm.Name),
