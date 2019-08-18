@@ -18,19 +18,21 @@ func (p Permission)CreateEntry() (Permission, error) {
 	if err != nil {
 		return Permission{}, err
 	}
-	perms, err := convertPermissionsToDynamo(p.Permissions)
+	perms, err := convertPermissionsToDynamo(p.Permissions, p.Identity)
 	if err != nil {
 		return Permission{}, err
 	}
 	svc := dynamodb.New(s)
+	item := map[string]*dynamodb.AttributeValue{
+    "identity": {
+      S: aws.String(p.Identity),
+    },
+    "permissions": &perms,
+  }
+
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
-		Item: map[string]*dynamodb.AttributeValue{
-			"identity": {
-				S: aws.String(p.Identity),
-			},
-			"permissions": &perms,
-		},
+		Item: item,
 		ConditionExpression: aws.String("attribute_not_exists(#IDENTITY)"),
 		ExpressionAttributeNames: map[string]*string{
 			"#IDENTITY": aws.String("identity"),
@@ -54,7 +56,7 @@ func (p Permission)CreateEntry() (Permission, error) {
 		}
 	}
 
-	return p, nil
+	return convertDynamoToPermission(item)
 }
 
 // RetrieveEntry get the permissions
@@ -92,7 +94,7 @@ func (p Permission)UpdateEntry(n Permission) (Permission, error) {
 	if err != nil {
 		return Permission{}, err
 	}
-	perms, err := convertPermissionsToDynamo(n.Permissions)
+	perms, err := convertPermissionsToDynamo(n.Permissions, n.Identity)
 	if err != nil {
 		return Permission{}, err
 	}
@@ -182,14 +184,15 @@ func ScanEntries() ([]Permission, error) {
 	return []Permission{}, nil
 }
 
-func convertPermissionsToDynamo(perms []Permissions) (dynamodb.AttributeValue, error) {
+func convertPermissionsToDynamo(perms []Permissions, ident string) (dynamodb.AttributeValue, error) {
 	ret := dynamodb.AttributeValue{}
 	lMap := []*dynamodb.AttributeValue{}
 
 	if len(perms) >= 1 {
 		for _, perm := range perms {
+		  identifier := perm.Identifier
 		  if perm.Identifier == "" {
-		    perm.Identifier = "*"
+		    identifier = ident
       }
 
 			retMap := map[string]*dynamodb.AttributeValue{}
@@ -200,7 +203,7 @@ func convertPermissionsToDynamo(perms []Permissions) (dynamodb.AttributeValue, e
 				S: aws.String(perm.Action),
 			}
 			retMap["identifier"] = &dynamodb.AttributeValue{
-			  S: aws.String(perm.Identifier),
+			  S: aws.String(identifier),
       }
 			mmap := &dynamodb.AttributeValue{
 				M: retMap,

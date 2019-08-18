@@ -1,13 +1,13 @@
 package permissions
 
 import (
-	"encoding/json"
-	// "errors"
-	"fmt"
-	"github.com/satori/go.uuid"
-	"net/http"
+  "encoding/json"
+  // "errors"
+  "fmt"
+  "github.com/satori/go.uuid"
+  "net/http"
 
-	// "strings"
+  // "strings"
 )
 
 // PermissionResponse struct

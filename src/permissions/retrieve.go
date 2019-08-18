@@ -1,10 +1,10 @@
 package permissions
 
 import (
-	"encoding/json"
-	"github.com/go-chi/chi"
-	"net/http"
-	"strings"
+  "encoding/json"
+  "github.com/go-chi/chi"
+  "net/http"
+  "strings"
 )
 
 // Retrieve get all the permissions

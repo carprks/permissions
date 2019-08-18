@@ -44,6 +44,7 @@ func TestCreate(t *testing.T) {
 						{
 							Action: "create",
 							Name:   "account",
+							Identifier: "testerHTTP",
 						},
 					},
 				},

@@ -33,7 +33,16 @@ func TestPermission_CreateEntry(t *testing.T) {
 	}{
 		{
 			request: perm,
-			expect: perm,
+			expect: permissions.Permission{
+        Identity:    "tester",
+        Permissions: []permissions.Permissions{
+          {
+            Name: "account",
+            Action: "create",
+            Identifier: "tester",
+          },
+        },
+      },
 			err: nil,
 		},
 	}
@@ -71,10 +80,12 @@ func TestPermission_UpdateEntry(t *testing.T) {
 			{
 				Name: "account",
 				Action: "create",
+				Identifier: "tester",
 			},
 			{
 				Name: "*",
 				Action: "*",
+				Identifier: "*",
 			},
 		},
 	}
@@ -142,10 +153,12 @@ func TestPermission_RetrieveEntry(t *testing.T) {
 			{
 				Name: "account",
 				Action: "create",
+				Identifier: "tester",
 			},
 			{
 				Name: "*",
 				Action: "*",
+				Identifier: "*",
 			},
 		},
 	}
