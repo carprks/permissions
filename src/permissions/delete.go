@@ -11,7 +11,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	identity := chi.URLParam(r, "identityID")
-	p := Permission{
+	p := Permissions{
 		Identity: identity,
 	}
 
@@ -23,7 +23,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(PermissionResponse{
-		Permission: resp,
+		Permissions: resp,
 	})
 	if err != nil {
 		ErrorResponse(w, err)

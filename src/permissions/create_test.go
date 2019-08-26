@@ -23,14 +23,14 @@ func TestCreate(t *testing.T) {
 	}
 
 	tests := []struct{
-		request permissions.Permission
+		request permissions.Permissions
 		expect permissions.PermissionResponse
 		err error
 	}{
 		{
-			request: permissions.Permission{
+			request: permissions.Permissions{
 				Identity: "testerHTTP",
-				Permissions: []permissions.Permissions{
+				Permissions: []permissions.Permission{
 					{
 						Action: "create",
 						Name: "account",
@@ -38,9 +38,9 @@ func TestCreate(t *testing.T) {
 				},
 			},
 			expect: permissions.PermissionResponse{
-				Permission: permissions.Permission{
+				Permissions: permissions.Permissions{
 					Identity: "testerHTTP",
-					Permissions: []permissions.Permissions{
+					Permissions: []permissions.Permission{
 						{
 							Action: "create",
 							Name:   "account",

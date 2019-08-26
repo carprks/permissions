@@ -12,7 +12,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	identity := chi.URLParam(r, "identityID")
-	p := Permission{
+	p := Permissions{
 		Identity: identity,
 	}
 
@@ -22,7 +22,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := Permission{}
+	req := Permissions{}
 	err = json.Unmarshal(body, &req)
 	if err != nil {
 		ErrorResponse(w, err)
@@ -37,7 +37,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 	err = json.NewEncoder(w).Encode(PermissionResponse{
-		Permission: up,
+		Permissions: up,
 	})
 	if err != nil {
 		ErrorResponse(w, err)

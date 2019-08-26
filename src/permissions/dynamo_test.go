@@ -17,9 +17,9 @@ func TestPermission_CreateEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permission{
+	perm := permissions.Permissions{
 		Identity: "tester",
-		Permissions: []permissions.Permissions{
+		Permissions: []permissions.Permission{
 			{
 				Name: "account",
 				Action: "create",
@@ -27,15 +27,15 @@ func TestPermission_CreateEntry(t *testing.T) {
 		},
 	}
 	tests := []struct{
-		request permissions.Permission
-		expect permissions.Permission
+		request permissions.Permissions
+		expect permissions.Permissions
 		err error
 	}{
 		{
 			request: perm,
-			expect: permissions.Permission{
+			expect: permissions.Permissions{
         Identity:    "tester",
-        Permissions: []permissions.Permissions{
+        Permissions: []permissions.Permission{
           {
             Name: "account",
             Action: "create",
@@ -65,18 +65,18 @@ func TestPermission_UpdateEntry(t *testing.T) {
 		}
 	}
 
-	orig := permissions.Permission{
+	orig := permissions.Permissions{
 		Identity: "tester",
-		Permissions: []permissions.Permissions{
+		Permissions: []permissions.Permission{
 			{
 				Name: "account",
 				Action: "create",
 			},
 		},
 	}
-	n := permissions.Permission{
+	n := permissions.Permissions{
 		Identity: "tester",
-		Permissions: []permissions.Permissions{
+		Permissions: []permissions.Permission{
 			{
 				Name: "account",
 				Action: "create",
@@ -91,9 +91,9 @@ func TestPermission_UpdateEntry(t *testing.T) {
 	}
 
 	tests := []struct{
-		request permissions.Permission
-		update permissions.Permission
-		expect permissions.Permission
+		request permissions.Permissions
+		update permissions.Permissions
+		expect permissions.Permissions
 		err error
 	}{
 		{
@@ -147,9 +147,9 @@ func TestPermission_RetrieveEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permission{
+	perm := permissions.Permissions{
 		Identity: "tester",
-		Permissions: []permissions.Permissions{
+		Permissions: []permissions.Permission{
 			{
 				Name: "account",
 				Action: "create",
@@ -164,8 +164,8 @@ func TestPermission_RetrieveEntry(t *testing.T) {
 	}
 
 	tests := []struct{
-		request permissions.Permission
-		expect permissions.Permission
+		request permissions.Permissions
+		expect permissions.Permissions
 		err error
 	}{
 		{
@@ -193,18 +193,18 @@ func TestPermission_DeleteEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permission{
+	perm := permissions.Permissions{
 		Identity: "tester",
 	}
 
 	tests := []struct{
-		request permissions.Permission
-		expect permissions.Permission
+		request permissions.Permissions
+		expect permissions.Permissions
 		err error
 	}{
 		{
 			request: perm,
-			expect: permissions.Permission{},
+			expect: permissions.Permissions{},
 			err: nil,
 		},
 	}

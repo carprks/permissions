@@ -10,17 +10,17 @@ import (
 )
 
 // CreateEntry create the permissions
-func (p Permission)CreateEntry() (Permission, error) {
+func (p Permissions)CreateEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	perms, err := convertPermissionsToDynamo(p.Permissions, p.Identity)
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	item := map[string]*dynamodb.AttributeValue{
@@ -43,16 +43,16 @@ func (p Permission)CreateEntry() (Permission, error) {
 		if awsErr, ok := putErr.(awserr.Error); ok {
 			switch awsErr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
-				return Permission{}, fmt.Errorf("permission identity already exists: %v", awsErr)
+				return Permissions{}, fmt.Errorf("permission identity already exists: %v", awsErr)
 			case "ValidationException":
 				fmt.Println(fmt.Sprintf("validation err reason: %v", input))
-				return Permission{}, fmt.Errorf("validation error: %v", awsErr)
+				return Permissions{}, fmt.Errorf("validation error: %v", awsErr)
 			default:
 				fmt.Println(fmt.Sprintf("unknown code err reason: %v", input))
-				return Permission{}, fmt.Errorf("unknown code err: %v", awsErr)
+				return Permissions{}, fmt.Errorf("unknown code err: %v", awsErr)
 			}
 		} else {
-			return Permission{}, fmt.Errorf("unknown err: %v", putErr)
+			return Permissions{}, fmt.Errorf("unknown err: %v", putErr)
 		}
 	}
 
@@ -60,13 +60,13 @@ func (p Permission)CreateEntry() (Permission, error) {
 }
 
 // RetrieveEntry get the permissions
-func (p Permission)RetrieveEntry() (Permission, error) {
+func (p Permissions)RetrieveEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.GetItemInput{
@@ -79,24 +79,24 @@ func (p Permission)RetrieveEntry() (Permission, error) {
 	}
 	result, err := svc.GetItem(input)
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 
 	return convertDynamoToPermission(result.Item)
 }
 
 // UpdateEntry alter the permissions
-func (p Permission)UpdateEntry(n Permission) (Permission, error) {
+func (p Permissions)UpdateEntry(n Permissions) (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	perms, err := convertPermissionsToDynamo(n.Permissions, n.Identity)
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.UpdateItemInput{
@@ -117,20 +117,20 @@ func (p Permission)UpdateEntry(n Permission) (Permission, error) {
 	}
 	ret, err := svc.UpdateItem(input)
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 
 	return convertDynamoToPermission(ret.Attributes)
 }
 
 // DeleteEntry remove the permissions
-func (p Permission)DeleteEntry() (Permission, error) {
+func (p Permissions)DeleteEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.DeleteItemInput{
@@ -143,20 +143,20 @@ func (p Permission)DeleteEntry() (Permission, error) {
 	}
 	_, err = svc.DeleteItem(input)
 	if err != nil {
-		return Permission{}, err
+		return Permissions{}, err
 	}
 
-	return Permission{}, nil
+	return Permissions{}, nil
 }
 
 // ScanEntries get all the permisisons
-func ScanEntries() ([]Permission, error) {
+func ScanEntries() ([]Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
-		return []Permission{}, err
+		return []Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.ScanInput{
@@ -164,11 +164,11 @@ func ScanEntries() ([]Permission, error) {
 	}
 	result, err := svc.Scan(input)
 	if err != nil {
-		return []Permission{}, err
+		return []Permissions{}, err
 	}
 	itemLen := len(result.Items)
 	if itemLen >= 1 {
-		perms := []Permission{}
+		perms := []Permissions{}
 		for i := 0; i < itemLen; i++ {
 			item := result.Items[i]
 			perm, err := convertDynamoToPermission(item)
@@ -181,10 +181,10 @@ func ScanEntries() ([]Permission, error) {
 		return perms, nil
 	}
 
-	return []Permission{}, nil
+	return []Permissions{}, nil
 }
 
-func convertPermissionsToDynamo(perms []Permissions, ident string) (dynamodb.AttributeValue, error) {
+func convertPermissionsToDynamo(perms []Permission, ident string) (dynamodb.AttributeValue, error) {
 	ret := dynamodb.AttributeValue{}
 	lMap := []*dynamodb.AttributeValue{}
 
@@ -224,8 +224,8 @@ func convertPermissionsToDynamo(perms []Permissions, ident string) (dynamodb.Att
 	return ret, nil
 }
 
-func convertDynamoToPermissions(perms *dynamodb.AttributeValue) (Permissions, error) {
-	ret := Permissions{}
+func convertDynamoToPermissions(perms *dynamodb.AttributeValue) (Permission, error) {
+	ret := Permission{}
 	for key, value := range perms.M {
 		switch key {
 		case "name":
@@ -243,8 +243,8 @@ func convertDynamoToPermissions(perms *dynamodb.AttributeValue) (Permissions, er
 	return ret, fmt.Errorf("couldnt convert to permissions")
 }
 
-func convertDynamoPermsToPermissions(perms []*dynamodb.AttributeValue) ([]Permissions, error) {
-	ret := []Permissions{}
+func convertDynamoPermsToPermissions(perms []*dynamodb.AttributeValue) ([]Permission, error) {
+	ret := []Permission{}
 	for _, perm := range perms {
 		p, err := convertDynamoToPermissions(perm)
 		if err != nil {
@@ -256,14 +256,14 @@ func convertDynamoPermsToPermissions(perms []*dynamodb.AttributeValue) ([]Permis
 	return ret, nil
 }
 
-func convertDynamoToPermission(perm map[string]*dynamodb.AttributeValue) (Permission, error) {
-	ret := Permission{}
+func convertDynamoToPermission(perm map[string]*dynamodb.AttributeValue) (Permissions, error) {
+	ret := Permissions{}
 	for key, value := range perm {
 		switch key {
 		case "permissions":
 			perms, err := convertDynamoPermsToPermissions(value.L)
 			if err != nil {
-				return Permission{}, err
+				return Permissions{}, err
 			}
 			ret.Permissions = perms
 		case "identity":
@@ -274,5 +274,5 @@ func convertDynamoToPermission(perm map[string]*dynamodb.AttributeValue) (Permis
 		return ret, nil
 	}
 
-	return ret, fmt.Errorf("couldnt convert to permission")
+	return ret, fmt.Errorf("couldnt convert to permissions")
 }

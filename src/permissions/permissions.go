@@ -12,18 +12,18 @@ import (
 
 // PermissionResponse struct
 type PermissionResponse struct {
-	Permission Permission `json:"permission,omitempty"`
+	Permissions Permissions `json:"permissions,omitempty"`
 	Error      error      `json:"error,omitempty"`
-}
-
-// Permission struct
-type Permission struct {
-	Identity    string        `json:"identity"`
-	Permissions []Permissions `json:"permissions"`
 }
 
 // Permissions struct
 type Permissions struct {
+	Identity    string        `json:"identity"`
+	Permissions []Permission `json:"permissions"`
+}
+
+// Permission struct
+type Permission struct {
 	Name   string `json:"name"`
 	Action string `json:"action"`
 	Identifier string `json:"identifier"`

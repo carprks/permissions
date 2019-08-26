@@ -11,7 +11,7 @@ import (
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	p := Permission{}
+	p := Permissions{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		ErrorResponse(w, err)
@@ -38,7 +38,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(PermissionResponse{
-		Permission: resp,
+		Permissions: resp,
 	})
 	if err != nil {
 		ErrorResponse(w, err)

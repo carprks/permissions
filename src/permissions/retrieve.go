@@ -12,7 +12,7 @@ func Retrieve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	identity := chi.URLParam(r, "identityID")
-	p := Permission{
+	p := Permissions{
 		Identity: identity,
 	}
 
@@ -24,7 +24,7 @@ func Retrieve(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(PermissionResponse{
-		Permission: perms,
+		Permissions: perms,
 	})
 	if err != nil {
 		ErrorResponse(w, err)
@@ -38,7 +38,7 @@ func Allowed(w http.ResponseWriter, r *http.Request) {
 	permReq := strings.Split(permission, ":")
 	allowed := false
 
-	p := Permission{
+	p := Permissions{
 		Identity: identity,
 	}
 	perms, err := p.RetrieveEntry()
