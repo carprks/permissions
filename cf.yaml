@@ -284,6 +284,7 @@ Resources:
 
   RestAPIDeployment:
     Type: AWS::ApiGateway::Deployment
+    DependsOn: RestAPIResourceProbe
     Properties:
       RestApiId: !Ref RestAPI
 
