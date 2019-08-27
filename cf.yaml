@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Permissions Service"
+Description: "Login Service"
 
 Parameters:
   ServiceName:
@@ -21,29 +21,6 @@ Parameters:
     Type: String
   BuildKey:
     Type: String
-  ImageURI:
-    Type: String
-  Priority:
-    Type: Number
-    Default: 2
-  DesiredCount:
-    Type: Number
-    Default: 1
-  LoadBalancerAddress:
-    Type: String
-  LoadBalancerListenerArn:
-    Type: String
-  VPCId:
-    Type: String
-  SubnetOne:
-    Type: String
-  SubnetTwo:
-    Type: String
-  SubnetThree:
-    Type: String
-  Cluster:
-    Type: String
-    Default: carprk
 
 Resources:
   Dynamo:
@@ -51,10 +28,10 @@ Resources:
     Properties:
       TableName: !Join ['-', [!Ref ServiceName, dynamo, !Ref Environment]]
       AttributeDefinitions:
-        - AttributeName: identity
+        - AttributeName: identifier
           AttributeType: S
       KeySchema:
-        - AttributeName: identity
+        - AttributeName: identifier
           KeyType: HASH
       ProvisionedThroughput:
         WriteCapacityUnits: 5
@@ -91,7 +68,7 @@ Resources:
       AuthorizerResultTtlInSeconds: 0
       AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerARN}/invocations
       Type: REQUEST
-      IdentitySource: !Sub method.request.header.X-Authorization
+      IdentitySource: method.request.header.X-Authorization
 
   RestAPI:
     Type: AWS::ApiGateway::RestApi
@@ -112,37 +89,44 @@ Resources:
         title: Empty
         type: object
 
-
-  RestAPIHealthCheck:
+  RestAPIResourceProbe:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref RestAPI
       ParentId: !GetAtt RestAPI.RootResourceId
-      PathPart: healthcheck
-  RestAPIHealthCheckGet:
+      PathPart: probe
+  RestAPIResourceProbeGet:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIHealthCheck
+      ResourceId: !Ref RestAPIResourceProbe
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: GET
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: !Ref EmptyModel
       Integration:
-        Type: HTTP
-        IntegrationHttpMethod: GET
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, healthcheck]]
+        Type: MOCK
+        RequestTemplates:
+          application/json: |
+            {"statusCode": 200}
         IntegrationResponses:
           - StatusCode: 200
+            ResponseTemplates:
+              application/json: |
+                {}
+      MethodResponses:
+        - StatusCode: 200
 
+  RestAPICreate:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: create
   RestAPICreatePost:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !GetAtt RestAPI.RootResourceId
+      ResourceId: !Ref RestAPICreate
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
       HttpMethod: POST
@@ -150,182 +134,156 @@ Resources:
         - StatusCode: 200
           ResponseModels:
             application/json: !Ref EmptyModel
-        - StatusCode: 201
+        - StatusCode: 502
           ResponseModels:
             application/json: !Ref EmptyModel
         - StatusCode: 400
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:
-        Type: HTTP
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
         IntegrationHttpMethod: POST
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, '']]
         IntegrationResponses:
           - StatusCode: 200
+          - StatusCode: 502
+          - StatusCode: 400
 
-  RestAPIPermissions:
+  RestAPIRetrieve:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref RestAPI
       ParentId: !GetAtt RestAPI.RootResourceId
-      PathPart: permissions
-  RestAPIIdentity:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref RestAPI
-      ParentId: !Ref RestAPIPermissions
-      PathPart: '{identity}'
-  RestAPIIdentityDelete:
+      PathPart: retrieve
+  RestAPIRetrieveOptions:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIIdentity
+      ResourceId: !Ref RestAPIRetrieve
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      HttpMethod: DELETE
-      RequestParameters:
-        method.request.path.identity: true
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: !Ref EmptyModel
-        - StatusCode: 400
-          ResponseModels:
-            application/json: !Ref EmptyModel
-      Integration:
-        Type: HTTP
-        IntegrationHttpMethod: DELETE
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
-        RequestParameters:
-          integration.request.path.identity: method.request.path.identity
-        IntegrationResponses:
-          - StatusCode: 200
-  RestAPIIdentityGet:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIIdentity
-      AuthorizationType: CUSTOM
-      AuthorizerId: !Ref Authorizer
-      HttpMethod: GET
-      RequestParameters:
-        method.request.path.identity: true
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: !Ref EmptyModel
-        - StatusCode: 400
-          ResponseModels:
-            application/json: !Ref EmptyModel
-      Integration:
-        Type: HTTP
-        IntegrationHttpMethod: GET
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
-        RequestParameters:
-          integration.request.path.identity: method.request.path.identity
-        IntegrationResponses:
-          - StatusCode: 200
-  RestAPIIdentityOptions:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIIdentity
       HttpMethod: OPTIONS
-      AuthorizationType: NONE
-      Integration:
-        ConnectionType: INTERNET
-        IntegrationResponses:
-          - ResponseTemplates:
-              application/json: "{\"message\": \"OK\"}"
-            StatusCode: 200
-        Type: MOCK
-  RestAPIIdentityPut:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIIdentity
-      HttpMethod: PUT
-      AuthorizationType: CUSTOM
-      AuthorizerId: !Ref Authorizer
-      RequestParameters:
-        method.request.path.identity: true
       MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: !Ref EmptyModel
-        - StatusCode: 202
-          ResponseModels:
-            application/json: !Ref EmptyModel
-        - StatusCode: 400
-          ResponseModels:
-            application/json: !Ref EmptyModel
+      - StatusCode: 200
+        ResponseModels:
+          application/json: !Ref EmptyModel
+      - StatusCode: 502
+        ResponseModels:
+          application/json: !Ref EmptyModel
+      - StatusCode: 400
+        ResponseModels:
+          application/json: !Ref EmptyModel
       Integration:
-        Type: HTTP
-        IntegrationHttpMethod: PUT
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', '']]
-        RequestParameters:
-          integration.request.path.identity: method.request.path.identity
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
+        IntegrationHttpMethod: OPTIONS
         IntegrationResponses:
-          - StatusCode: 200
+        - StatusCode: 200
+        - StatusCode: 502
+        - StatusCode: 400
 
   RestAPIAllowed:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref RestAPI
-      ParentId: !Ref RestAPIIdentity
+      ParentId: !GetAtt RestAPI.RootResourceId
       PathPart: allowed
-  RestAPIAllowedPermission:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref RestAPI
-      ParentId: !Ref RestAPIAllowed
-      PathPart: '{permission}'
-  RestAPIAllowedPermissionGet:
+  RestAPIAllowedOptions:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIAllowedPermission
-      HttpMethod: GET
+      ResourceId: !Ref RestAPIAllowed
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      RequestParameters:
-        method.request.path.identity: true
-        method.request.path.permission: true
+      HttpMethod: OPTIONS
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: !Ref EmptyModel
+      - StatusCode: 502
+        ResponseModels:
+          application/json: !Ref EmptyModel
+      - StatusCode: 400
+        ResponseModels:
+          application/json: !Ref EmptyModel
+      Integration:
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
+        IntegrationHttpMethod: OPTIONS
+        IntegrationResponses:
+        - StatusCode: 200
+        - StatusCode: 502
+        - StatusCode: 400
+
+  RestAPIUpdate:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: update
+  RestAPIUpdatePut:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIUpdate
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: PUT
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
             application/json: !Ref EmptyModel
-        - StatusCode: 403
+        - StatusCode: 502
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 400
           ResponseModels:
             application/json: !Ref EmptyModel
       Integration:
-        Type: HTTP
-        IntegrationHttpMethod: GET
-        Uri: !Join ['/', [!Ref LoadBalancerAddress, !Ref ServiceName, !Ref ServiceName, '{identity}', allowed, '{permission}', '']]
-        RequestParameters:
-          integration.request.path.identity: method.request.path.identity
-          integration.request.path.permission: method.request.path.permission
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
+        IntegrationHttpMethod: PUT
         IntegrationResponses:
           - StatusCode: 200
-  RestAPIAllowedPermissionOptions:
+          - StatusCode: 502
+          - StatusCode: 400
+
+  RestAPIDelete:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: delete
+  RestAPIDeleteDelete:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
-      ResourceId: !Ref RestAPIAllowedPermission
-      HttpMethod: OPTIONS
-      AuthorizationType: NONE
+      ResourceId: !Ref RestAPIDelete
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      HttpMethod: DELETE
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 502
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
-        ConnectionType: INTERNET
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
+        IntegrationHttpMethod: DELETE
         IntegrationResponses:
-          - ResponseTemplates:
-              application/json: "{\"message\": \"OK\"}"
-            StatusCode: 200
-        Type: MOCK
-
+          - StatusCode: 200
+          - StatusCode: 502
 
   RestAPIDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: RestAPIHealthCheckGet
     Properties:
       RestApiId: !Ref RestAPI
 
@@ -366,267 +324,97 @@ Resources:
         DNSName: !GetAtt RestAPIDomainName.RegionalDomainName
         EvaluateTargetHealth: false
 
-  TaskRole:
+  ServiceARN:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ['-', [!Ref ServiceName, taskrole, !Ref Environment]]
+      RoleName: !Join ['-', [!Ref ServiceName, role, !Ref Environment]]
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service:
-                - ecs-tasks.amazonaws.com
+                - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: ecs
+        - PolicyName: lambda
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - ecr:GetAuthorizationToken
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:GetDownloadUrlForLayer
-                  - ecr:BatchGetImage
+                  - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: '*'
               - Effect: Allow
-                Action:
-                  - 's3:Get*'
-                  - 's3:List*'
-                Resource: '*'
+                Action: dynamodb:*
+                Resource: !GetAtt Dynamo.Arn
               - Effect: Allow
-                Action:
-                  - iam:CreateServiceLinkedRole
                 Resource: '*'
-                Condition:
-                  StringEquals:
-                    iam:AWSServiceName:
-                      - replication.dynamodb.amazonaws.com
-                      - dax.amazonaws.com
-                      - dynamodb.application-autoscaling.amazonaws.com
-              - Effect: Allow
                 Action:
-                  - iam:PassRole
-                Resource: '*'
-                Condition:
-                  StringLike:
-                    iam:PassedToService:
-                      - application-autoscaling.amazonaws.com
-                      - dax.amazonaws.com
-              - Effect: Allow
-                Action:
-                  - dynamodb:*
-                  - dax:*
-                  - application-autoscaling:*
-                  - cloudwatch:*
-                  - iam:GetRole
-                  - iam:ListRoles
-                  - resource-groups:*
-                  - tag:GetResources"
-                Resource: '*'
-
-#  ScalingRole:
-#    Type: AWS::IAM::Role
-#    Properties:
-#      AssumeRolePolicyDocument:
-#        Statement:
-#          - Effect: Allow
-#            Principal:
-#              Service:
-#                - application-autoscaling.amazonaws.com
-#            Action:
-#              - sts:AssumeRole
-#      Path: /
-#      Policies:
-#        - PolicyName: service-autoscaling
-#          PolicyDocument:
-#            Statement:
-#              - Effect: Allow
-#                Action:
-#                  - application-autoscaling:*
-#                  - cloudwatch:DescribeAlarms
-#                  - cloudwatch:PutMetricAlarm
-#                  - ecs:DescribeService
-#                  - ecs:UpdateService
-#                Resource: '*'
-#
-#  ScalingTarget:
-#    Type: AWS::ApplicationAutoScaling::ScalableTarget
-#    Properties:
-#      MaxCapacity: 10
-#      MinCapacity: 1
-#      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt PermissionService.Name]]
-#      RoleARN: !Ref ScalingRole
-#      ScalableDimension: ecs:service:DesiredCount
-#      ServiceNamespace: ecs
-#
-#  ScaleUp:
-#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-#    Properties:
-#      PolicyName: !Join ['', [!Ref ServiceName, ScaleUp]]
-#      PolicyType: StepScaling
-#      ScalingTargetId: !Ref ScalingTarget
-#      StepScalingPolicyConfiguration:
-#        Cooldown: 60
-#        MetricAggregationType: Average
-#        AdjstmentType: ChangeInCapacity
-#        StepAdjustments:
-#          - MetricIntervalLowerBound: 0
-#            MetricIntervalUpperBound: 100
-#            ScalingAdjustment: 2
-#          - MetricIntervalLowerBound: 100
-#            ScalingAdjustment: 4
-#  ScaleDown:
-#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-#    Properties:
-#      PolicyName: !Join ['', [!Ref ServiceName, ScaleDown]]
-#      PolicyType: StepScaling
-#      ScalingTargetId: !Ref ScalingTarget
-#      StepScalingPolicyConfiguration:
-#        Cooldown: 60
-#        MetricAggregationType: Average
-#        AdjustmentType: ChangeInCapacity
-#        StepAdjustments:
-#          - MetricIntervalUpperBound: -1
-#            MetricIntervalLowerBound: -100
-#            ScalingAdjustment: -1
-#          - MetficIntervalUpperBound: -100
-#            ScalingAdjustment: -2
-#
-#  ServiceCloudwatchAlarm:
-#    Type: AWS::CloudWatch::Alarm
-#    Properties:
-#      AlarmName: !Join ['', [!Ref ServiceName, ScaleDown]]
-#      Namespace: AWS/SQS
-#      MetricName: ApproximateNumberOfMessagesVisible
-#      ComparisonOperator: GreaterThanThreshold
-#      Dimensions:
-#        - Name: QueueName
-#          Value: !Ref
-
-  PermissionsTask:
-    Type: AWS::ECS::TaskDefinition
+                  - dynamodb:DescribeReservedCapacityOfferings
+                  - dynamodb:ListGlobalTables
+                  - dynamodb:ListTables
+                  - dynamodb:DescribeReservedCapacity
+                  - dynamodb:ListBackups
+                  - dynamodb:PurchaseReservedCapacityOfferings
+                  - dynamodb:DescribeLimits
+                  - dynamodb:ListStreams
+  Service:
+    Type: AWS::Lambda::Function
     Properties:
-      ContainerDefinitions:
-        - Environment:
-            - Name: AWS_DB_ENDPOINT
-              Value: !Join ['', ['http://', 'dynamodb.', !Ref 'AWS::Region', '.amazonaws.com']]
-            - Name: AWS_DB_REGION
-              Value: !Ref AWS::Region
-            - Name: AWS_DB_TABLE
-              Value: !Ref Dynamo
-            - Name: DATABASE_DYNAMO
-              Value: true
-            - Name: PORT
-              Value: 80
-            - Name: SERVICE_NAME
-              Value: !Ref ServiceName
-            - Name: SITE_PREFIX
-              Value: !Join ['', ['/', !Ref ServiceName]]
-          Essential: true
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - curl --silent --fail localhost/probe || exit 1
-            Interval: 60
-            Retries: 10
-            StartPeriod: 60
-            Timeout: 10
-          Image: !Ref ImageURI
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref CloudwatchLogs
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: 'ecs'
-          PortMappings:
-            - ContainerPort: 80
-              HostPort: 80
-              Protocol: tcp
-          Name: !Ref ServiceName
-      Cpu: 256
-      ExecutionRoleArn: !GetAtt TaskRole.Arn
-      Family: !Ref ServiceName
-      Memory: 512
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - FARGATE
-      TaskRoleArn: !GetAtt TaskRole.Arn
+      FunctionName: !Join ['-', [!Ref ServiceName, lambda, !Ref Environment]]
+      Role: !GetAtt ServiceARN.Arn
+      Runtime: go1.x
+      Handler: !Ref ServiceName
+      Timeout: 10
+      Environment:
+        Variables:
+          DB_TABLE: !Ref Dynamo
+          DB_ENDPOINT: !Join ['', ['http://', 'dynamodb.', !Ref 'AWS::Region', '.amazonaws.com']]
+          DB_REGION: !Ref AWS::Region
+      Code:
+        S3Bucket: !Ref BuildBucket
+        S3Key: !Ref BuildKey
 
-  CloudwatchLogs:
-    Type: AWS::Logs::LogGroup
+  ServiceInvokeCreate:
+    Type: AWS::Lambda::Permission
     Properties:
-      LogGroupName: !Join ['/', ['/ecs', !Ref ServiceName]]
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt Service.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/POST/create
 
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ServiceInvokeUpdate:
+    Type: AWS::Lambda::Permission
     Properties:
-      HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /probe
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 4
-      HealthyThresholdCount: 2
-      TargetType: ip
-      Name: !Join ['-', [!Ref ServiceName, targetgroup, !Ref Environment]]
-      Port: 80
-      Protocol: HTTP
-      UnhealthyThresholdCount: 2
-      VpcId: !Ref VPCId
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt Service.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/PUT/update
 
-  LoadBalancerRule:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+  ServiceInvokeDelete:
+    Type: AWS::Lambda::Permission
     Properties:
-      Actions:
-        - TargetGroupArn: !Ref TargetGroup
-          Type: forward
-      Conditions:
-        - Field: path-pattern
-          Values:
-            - !Sub "/${ServiceName}*"
-      ListenerArn: !Ref LoadBalancerListenerArn
-      Priority: !Ref Priority
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt Service.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/DELETE/delete
 
-  SecGroup:
-    Type: AWS::EC2::SecurityGroup
+  ServiceInvokeRetrieve:
+    Type: AWS::Lambda::Permission
     Properties:
-      GroupDescription: !Join ['-', [!Ref ServiceName, securitygroup, !Ref Environment]]
-      GroupName: !Join ['-', [!Ref ServiceName, securitygroup, !Ref Environment]]
-      SecurityGroupEgress:
-        - CidrIp: '0.0.0.0/0'
-          IpProtocol: -1
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: '0.0.0.0/0'
-      VpcId: !Ref VPCId
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt Service.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/OPTIONS/retrieve
 
-  PermissionService:
-    Type: AWS::ECS::Service
-    DependsOn: LoadBalancerRule
+  ServiceInvokeAllowed:
+    Type: AWS::Lambda::Permission
     Properties:
-      Cluster: !Ref Cluster
-      DeploymentConfiguration:
-        MaximumPercent: 200
-        MinimumHealthyPercent: 100
-      DesiredCount: !Ref DesiredCount
-      HealthCheckGracePeriodSeconds: 5
-      LaunchType: FARGATE
-      LoadBalancers:
-        - ContainerName: !Ref ServiceName
-          ContainerPort: 80
-          TargetGroupArn: !Ref TargetGroup
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: ENABLED
-          SecurityGroups:
-            - !Ref SecGroup
-          Subnets:
-            - !Ref SubnetOne
-            - !Ref SubnetTwo
-            - !Ref SubnetThree
-      TaskDefinition: !Ref PermissionsTask
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt Service.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/OPTIONS/allowed

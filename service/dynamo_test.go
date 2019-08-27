@@ -1,8 +1,8 @@
-package permissions_test
+package service_test
 
 import (
 	"fmt"
-	"github.com/carprks/permissions/src/permissions"
+	"github.com/carprks/permissions/service"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -17,32 +17,32 @@ func TestPermission_CreateEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permissions{
-		Identity: "tester",
-		Permissions: []permissions.Permission{
+	perm := service.Permissions{
+		Identifier: "tester",
+		Permissions: []service.Permission{
 			{
-				Name: "account",
+				Name:   "account",
 				Action: "create",
 			},
 		},
 	}
-	tests := []struct{
-		request permissions.Permissions
-		expect permissions.Permissions
-		err error
+	tests := []struct {
+		request service.Permissions
+		expect  service.Permissions
+		err     error
 	}{
 		{
 			request: perm,
-			expect: permissions.Permissions{
-        Identity:    "tester",
-        Permissions: []permissions.Permission{
-          {
-            Name: "account",
-            Action: "create",
-            Identifier: "tester",
-          },
-        },
-      },
+			expect: service.Permissions{
+				Identifier: "tester",
+				Permissions: []service.Permission{
+					{
+						Name:       "account",
+						Action:     "create",
+						Identifier: "tester",
+					},
+				},
+			},
 			err: nil,
 		},
 	}
@@ -65,42 +65,42 @@ func TestPermission_UpdateEntry(t *testing.T) {
 		}
 	}
 
-	orig := permissions.Permissions{
-		Identity: "tester",
-		Permissions: []permissions.Permission{
+	orig := service.Permissions{
+		Identifier: "tester",
+		Permissions: []service.Permission{
 			{
-				Name: "account",
+				Name:   "account",
 				Action: "create",
 			},
 		},
 	}
-	n := permissions.Permissions{
-		Identity: "tester",
-		Permissions: []permissions.Permission{
+	n := service.Permissions{
+		Identifier: "tester",
+		Permissions: []service.Permission{
 			{
-				Name: "account",
-				Action: "create",
+				Name:       "account",
+				Action:     "create",
 				Identifier: "tester",
 			},
 			{
-				Name: "*",
-				Action: "*",
+				Name:       "*",
+				Action:     "*",
 				Identifier: "*",
 			},
 		},
 	}
 
-	tests := []struct{
-		request permissions.Permissions
-		update permissions.Permissions
-		expect permissions.Permissions
-		err error
+	tests := []struct {
+		request service.Permissions
+		update  service.Permissions
+		expect  service.Permissions
+		err     error
 	}{
 		{
 			request: orig,
-			update: n,
-			expect: n,
-			err: nil,
+			update:  n,
+			expect:  n,
+			err:     nil,
 		},
 	}
 
@@ -122,18 +122,18 @@ func TestScanEntries(t *testing.T) {
 		}
 	}
 
-	tests := []struct{
+	tests := []struct {
 		expect int
-		err error
+		err    error
 	}{
 		{
 			expect: 1,
-			err: nil,
+			err:    nil,
 		},
 	}
 
 	for _, test := range tests {
-		response, err := permissions.ScanEntries()
+		response, err := service.ScanEntries()
 		assert.IsType(t, test.err, err)
 		assert.GreaterOrEqual(t, len(response), test.expect)
 	}
@@ -147,31 +147,31 @@ func TestPermission_RetrieveEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permissions{
-		Identity: "tester",
-		Permissions: []permissions.Permission{
+	perm := service.Permissions{
+		Identifier: "tester",
+		Permissions: []service.Permission{
 			{
-				Name: "account",
-				Action: "create",
+				Name:       "account",
+				Action:     "create",
 				Identifier: "tester",
 			},
 			{
-				Name: "*",
-				Action: "*",
+				Name:       "*",
+				Action:     "*",
 				Identifier: "*",
 			},
 		},
 	}
 
-	tests := []struct{
-		request permissions.Permissions
-		expect permissions.Permissions
-		err error
+	tests := []struct {
+		request service.Permissions
+		expect  service.Permissions
+		err     error
 	}{
 		{
 			request: perm,
-			expect: perm,
-			err: nil,
+			expect:  perm,
+			err:     nil,
 		},
 	}
 
@@ -193,18 +193,21 @@ func TestPermission_DeleteEntry(t *testing.T) {
 		}
 	}
 
-	perm := permissions.Permissions{
-		Identity: "tester",
+	perm := service.Permissions{
+		Identifier: "tester",
 	}
 
-	tests := []struct{
-		request permissions.Permissions
-		expect permissions.Permissions
-		err error
+	tests := []struct {
+		request service.Permissions
+		expect  service.Permissions
+		err     error
 	}{
 		{
 			request: perm,
-			expect: permissions.Permissions{},
+			expect: service.Permissions{
+				Identifier: "tester",
+				Status:     "deleted",
+			},
 			err: nil,
 		},
 	}

@@ -1,6 +1,7 @@
 module github.com/carprks/permissions
 
 require (
+	github.com/aws/aws-lambda-go v1.13.0
 	github.com/aws/aws-sdk-go v1.23.8
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/joho/godotenv v1.3.0

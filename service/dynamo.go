@@ -1,4 +1,4 @@
-package permissions
+package service
 
 import (
 	"fmt"
@@ -10,32 +10,32 @@ import (
 )
 
 // CreateEntry create the permissions
-func (p Permissions)CreateEntry() (Permissions, error) {
+func (p Permissions) CreateEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("AWS_DB_REGION")),
+		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
 	}
-	perms, err := convertPermissionsToDynamo(p.Permissions, p.Identity)
+	perms, err := convertPermissionsToDynamo(p.Permissions, p.Identifier)
 	if err != nil {
 		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	item := map[string]*dynamodb.AttributeValue{
-    "identity": {
-      S: aws.String(p.Identity),
-    },
-    "permissions": &perms,
-  }
+		"identifier": {
+			S: aws.String(p.Identifier),
+		},
+		"permissions": &perms,
+	}
 
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
-		Item: item,
-		ConditionExpression: aws.String("attribute_not_exists(#IDENTITY)"),
+		TableName:           aws.String(os.Getenv("AWS_DB_TABLE")),
+		Item:                item,
+		ConditionExpression: aws.String("attribute_not_exists(#IDENTIFIER)"),
 		ExpressionAttributeNames: map[string]*string{
-			"#IDENTITY": aws.String("identity"),
+			"#IDENTIFIER": aws.String("identifier"),
 		},
 	}
 	_, putErr := svc.PutItem(input)
@@ -43,7 +43,7 @@ func (p Permissions)CreateEntry() (Permissions, error) {
 		if awsErr, ok := putErr.(awserr.Error); ok {
 			switch awsErr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
-				return Permissions{}, fmt.Errorf("permission identity already exists: %v", awsErr)
+				return Permissions{}, fmt.Errorf("permission identifier already exists: %v", awsErr)
 			case "ValidationException":
 				fmt.Println(fmt.Sprintf("validation err reason: %v", input))
 				return Permissions{}, fmt.Errorf("validation error: %v", awsErr)
@@ -60,9 +60,9 @@ func (p Permissions)CreateEntry() (Permissions, error) {
 }
 
 // RetrieveEntry get the permissions
-func (p Permissions)RetrieveEntry() (Permissions, error) {
+func (p Permissions) RetrieveEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("AWS_DB_REGION")),
+		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
@@ -72,8 +72,8 @@ func (p Permissions)RetrieveEntry() (Permissions, error) {
 	input := &dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
-			"identity": {
-				S: aws.String(p.Identity),
+			"identifier": {
+				S: aws.String(p.Identifier),
 			},
 		},
 	}
@@ -82,19 +82,25 @@ func (p Permissions)RetrieveEntry() (Permissions, error) {
 		return Permissions{}, err
 	}
 
+	if result.Item == nil {
+		return Permissions{
+			Identifier: p.Identifier,
+			Status:   "no permissions",
+		}, nil
+	}
 	return convertDynamoToPermission(result.Item)
 }
 
 // UpdateEntry alter the permissions
-func (p Permissions)UpdateEntry(n Permissions) (Permissions, error) {
+func (p Permissions) UpdateEntry(n Permissions) (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("AWS_DB_REGION")),
+		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
 	}
-	perms, err := convertPermissionsToDynamo(n.Permissions, n.Identity)
+	perms, err := convertPermissionsToDynamo(n.Permissions, n.Identifier)
 	if err != nil {
 		return Permissions{}, err
 	}
@@ -108,11 +114,11 @@ func (p Permissions)UpdateEntry(n Permissions) (Permissions, error) {
 			":permissions": &perms,
 		},
 		Key: map[string]*dynamodb.AttributeValue{
-			"identity": {
-				S: aws.String(p.Identity),
+			"identifier": {
+				S: aws.String(p.Identifier),
 			},
 		},
-		ReturnValues: aws.String("ALL_NEW"),
+		ReturnValues:     aws.String("ALL_NEW"),
 		UpdateExpression: aws.String("SET #PERMISSIONS = :permissions"),
 	}
 	ret, err := svc.UpdateItem(input)
@@ -124,9 +130,9 @@ func (p Permissions)UpdateEntry(n Permissions) (Permissions, error) {
 }
 
 // DeleteEntry remove the permissions
-func (p Permissions)DeleteEntry() (Permissions, error) {
+func (p Permissions) DeleteEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("AWS_DB_REGION")),
+		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
@@ -136,8 +142,8 @@ func (p Permissions)DeleteEntry() (Permissions, error) {
 	input := &dynamodb.DeleteItemInput{
 		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
-			"identity": {
-				S: aws.String(p.Identity),
+			"identifier": {
+				S: aws.String(p.Identifier),
 			},
 		},
 	}
@@ -146,13 +152,16 @@ func (p Permissions)DeleteEntry() (Permissions, error) {
 		return Permissions{}, err
 	}
 
-	return Permissions{}, nil
+	return Permissions{
+		Identifier: p.Identifier,
+		Status:   "deleted",
+	}, nil
 }
 
 // ScanEntries get all the permisisons
 func ScanEntries() ([]Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region: aws.String(os.Getenv("AWS_DB_REGION")),
+		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
 		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
 	})
 	if err != nil {
@@ -190,10 +199,10 @@ func convertPermissionsToDynamo(perms []Permission, ident string) (dynamodb.Attr
 
 	if len(perms) >= 1 {
 		for _, perm := range perms {
-		  identifier := perm.Identifier
-		  if perm.Identifier == "" {
-		    identifier = ident
-      }
+			identifier := perm.Identifier
+			if perm.Identifier == "" {
+				identifier = ident
+			}
 
 			retMap := map[string]*dynamodb.AttributeValue{}
 			retMap["name"] = &dynamodb.AttributeValue{
@@ -203,8 +212,8 @@ func convertPermissionsToDynamo(perms []Permission, ident string) (dynamodb.Attr
 				S: aws.String(perm.Action),
 			}
 			retMap["identifier"] = &dynamodb.AttributeValue{
-			  S: aws.String(identifier),
-      }
+				S: aws.String(identifier),
+			}
 			mmap := &dynamodb.AttributeValue{
 				M: retMap,
 			}
@@ -232,8 +241,8 @@ func convertDynamoToPermissions(perms *dynamodb.AttributeValue) (Permission, err
 			ret.Name = *value.S
 		case "action":
 			ret.Action = *value.S
-    case "identifier":
-      ret.Identifier = *value.S
+		case "identifier":
+			ret.Identifier = *value.S
 		}
 	}
 	if ret.Name != "" {
@@ -266,11 +275,11 @@ func convertDynamoToPermission(perm map[string]*dynamodb.AttributeValue) (Permis
 				return Permissions{}, err
 			}
 			ret.Permissions = perms
-		case "identity":
-			ret.Identity = *value.S
+		case "identifier":
+			ret.Identifier = *value.S
 		}
 	}
-	if ret.Identity != "" {
+	if ret.Identifier != "" {
 		return ret, nil
 	}
 
