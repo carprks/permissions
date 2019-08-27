@@ -165,24 +165,24 @@ Resources:
       AuthorizerId: !Ref Authorizer
       HttpMethod: OPTIONS
       MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: !Ref EmptyModel
-      - StatusCode: 502
-        ResponseModels:
-          application/json: !Ref EmptyModel
-      - StatusCode: 400
-        ResponseModels:
-          application/json: !Ref EmptyModel
+        - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 502
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: AWS_PROXY
         Uri: !Sub >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
         IntegrationHttpMethod: OPTIONS
         IntegrationResponses:
-        - StatusCode: 200
-        - StatusCode: 502
-        - StatusCode: 400
+          - StatusCode: 200
+          - StatusCode: 502
+          - StatusCode: 400
 
   RestAPIAllowed:
     Type: AWS::ApiGateway::Resource
@@ -199,24 +199,24 @@ Resources:
       AuthorizerId: !Ref Authorizer
       HttpMethod: OPTIONS
       MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: !Ref EmptyModel
-      - StatusCode: 502
-        ResponseModels:
-          application/json: !Ref EmptyModel
-      - StatusCode: 400
-        ResponseModels:
-          application/json: !Ref EmptyModel
+        - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 502
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
       Integration:
         Type: AWS_PROXY
         Uri: !Sub >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
         IntegrationHttpMethod: OPTIONS
         IntegrationResponses:
-        - StatusCode: 200
-        - StatusCode: 502
-        - StatusCode: 400
+          - StatusCode: 200
+          - StatusCode: 502
+          - StatusCode: 400
 
   RestAPIUpdate:
     Type: AWS::ApiGateway::Resource
