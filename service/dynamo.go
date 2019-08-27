@@ -12,8 +12,8 @@ import (
 // CreateEntry create the permissions
 func (p Permissions) CreateEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
-		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
+		Region:   aws.String(os.Getenv("DB_REGION")),
+		Endpoint: aws.String(os.Getenv("DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
@@ -31,7 +31,7 @@ func (p Permissions) CreateEntry() (Permissions, error) {
 	}
 
 	input := &dynamodb.PutItemInput{
-		TableName:           aws.String(os.Getenv("AWS_DB_TABLE")),
+		TableName:           aws.String(os.Getenv("DB_TABLE")),
 		Item:                item,
 		ConditionExpression: aws.String("attribute_not_exists(#IDENTIFIER)"),
 		ExpressionAttributeNames: map[string]*string{
@@ -62,15 +62,15 @@ func (p Permissions) CreateEntry() (Permissions, error) {
 // RetrieveEntry get the permissions
 func (p Permissions) RetrieveEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
-		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
+		Region:   aws.String(os.Getenv("DB_REGION")),
+		Endpoint: aws.String(os.Getenv("DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.GetItemInput{
-		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
+		TableName: aws.String(os.Getenv("DB_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"identifier": {
 				S: aws.String(p.Identifier),
@@ -94,8 +94,8 @@ func (p Permissions) RetrieveEntry() (Permissions, error) {
 // UpdateEntry alter the permissions
 func (p Permissions) UpdateEntry(n Permissions) (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
-		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
+		Region:   aws.String(os.Getenv("DB_REGION")),
+		Endpoint: aws.String(os.Getenv("DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
@@ -106,7 +106,7 @@ func (p Permissions) UpdateEntry(n Permissions) (Permissions, error) {
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.UpdateItemInput{
-		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
+		TableName: aws.String(os.Getenv("DB_TABLE")),
 		ExpressionAttributeNames: map[string]*string{
 			"#PERMISSIONS": aws.String("permissions"),
 		},
@@ -132,15 +132,15 @@ func (p Permissions) UpdateEntry(n Permissions) (Permissions, error) {
 // DeleteEntry remove the permissions
 func (p Permissions) DeleteEntry() (Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
-		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
+		Region:   aws.String(os.Getenv("DB_REGION")),
+		Endpoint: aws.String(os.Getenv("DB_ENDPOINT")),
 	})
 	if err != nil {
 		return Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.DeleteItemInput{
-		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
+		TableName: aws.String(os.Getenv("DB_TABLE")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"identifier": {
 				S: aws.String(p.Identifier),
@@ -161,15 +161,15 @@ func (p Permissions) DeleteEntry() (Permissions, error) {
 // ScanEntries get all the permisisons
 func ScanEntries() ([]Permissions, error) {
 	s, err := session.NewSession(&aws.Config{
-		Region:   aws.String(os.Getenv("AWS_DB_REGION")),
-		Endpoint: aws.String(os.Getenv("AWS_DB_ENDPOINT")),
+		Region:   aws.String(os.Getenv("DB_REGION")),
+		Endpoint: aws.String(os.Getenv("DB_ENDPOINT")),
 	})
 	if err != nil {
 		return []Permissions{}, err
 	}
 	svc := dynamodb.New(s)
 	input := &dynamodb.ScanInput{
-		TableName: aws.String(os.Getenv("AWS_DB_TABLE")),
+		TableName: aws.String(os.Getenv("DB_TABLE")),
 	}
 	result, err := svc.Scan(input)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 )
 
 func TestPermission_CreateEntry(t *testing.T) {
-	if os.Getenv("AWS_DB_TABLE") == "" {
+	if os.Getenv("DB_TABLE") == "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("godotenv err: %v", err))
@@ -58,7 +58,7 @@ func TestPermission_CreateEntry(t *testing.T) {
 }
 
 func TestPermission_UpdateEntry(t *testing.T) {
-	if os.Getenv("AWS_DB_TABLE") != "" {
+	if os.Getenv("DB_TABLE") != "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("godotenv err: %v", err))
@@ -115,7 +115,7 @@ func TestPermission_UpdateEntry(t *testing.T) {
 }
 
 func TestScanEntries(t *testing.T) {
-	if os.Getenv("AWS_DB_TABLE") == "" {
+	if os.Getenv("DB_TABLE") == "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("godotenv err: %v", err))
@@ -140,7 +140,7 @@ func TestScanEntries(t *testing.T) {
 }
 
 func TestPermission_RetrieveEntry(t *testing.T) {
-	if os.Getenv("AWS_DB_TABLE") == "" {
+	if os.Getenv("DB_TABLE") == "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("godotenv err: %v", err))
@@ -186,7 +186,7 @@ func TestPermission_RetrieveEntry(t *testing.T) {
 }
 
 func TestPermission_DeleteEntry(t *testing.T) {
-	if os.Getenv("AWS_DB_TABLE") == "" {
+	if os.Getenv("DB_TABLE") == "" {
 		err := godotenv.Load()
 		if err != nil {
 			fmt.Println(fmt.Sprintf("godotenv err: %v", err))
