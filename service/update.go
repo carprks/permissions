@@ -12,7 +12,7 @@ func update(body string) (string, error) {
 	}
 
 	p := Permissions{
-        Identifier: req.Identifier,
+		Identifier: req.Identifier,
 	}
 	p, err = p.RetrieveEntry()
 	if err != nil {
@@ -39,7 +39,7 @@ func update(body string) (string, error) {
 
 func (p Permissions) update(n Permissions) (Permissions, error) {
 	r := Permissions{
-        Identifier: n.Identifier,
+		Identifier: n.Identifier,
 	}
 
 	for _, oldPerm := range p.Permissions {

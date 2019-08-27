@@ -85,7 +85,7 @@ func (p Permissions) RetrieveEntry() (Permissions, error) {
 	if result.Item == nil {
 		return Permissions{
 			Identifier: p.Identifier,
-			Status:   "no permissions",
+			Status:     "no permissions",
 		}, nil
 	}
 	return convertDynamoToPermission(result.Item)
@@ -154,7 +154,7 @@ func (p Permissions) DeleteEntry() (Permissions, error) {
 
 	return Permissions{
 		Identifier: p.Identifier,
-		Status:   "deleted",
+		Status:     "deleted",
 	}, nil
 }
 

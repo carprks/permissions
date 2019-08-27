@@ -47,25 +47,25 @@ func allowed(body string) (string, error) {
 				}
 
 				if perm.Action == "*" {
-				    allowed = true
-                }
+					allowed = true
+				}
 			}
 
 			if perm.Name == "*" {
-			    allowed = true
-            }
+				allowed = true
+			}
 		}
 	}
 
 	if allowed {
 		resp = Permissions{
-            Identifier: p.Identifier,
-			Status:   "allowed",
+			Identifier: p.Identifier,
+			Status:     "allowed",
 		}
 	} else {
 		resp = Permissions{
-            Identifier: p.Identifier,
-			Status:   "denied",
+			Identifier: p.Identifier,
+			Status:     "denied",
 		}
 	}
 
