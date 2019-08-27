@@ -156,14 +156,14 @@ Resources:
       RestApiId: !Ref RestAPI
       ParentId: !GetAtt RestAPI.RootResourceId
       PathPart: retrieve
-  RestAPIRetrieveOptions:
+  RestAPIRetrievePost:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
       ResourceId: !Ref RestAPIRetrieve
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      HttpMethod: OPTIONS
+      HttpMethod: POST
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -178,7 +178,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
-        IntegrationHttpMethod: OPTIONS
+        IntegrationHttpMethod: POST
         IntegrationResponses:
           - StatusCode: 200
           - StatusCode: 502
@@ -190,14 +190,14 @@ Resources:
       RestApiId: !Ref RestAPI
       ParentId: !GetAtt RestAPI.RootResourceId
       PathPart: allowed
-  RestAPIAllowedOptions:
+  RestAPIAllowedPost:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref RestAPI
       ResourceId: !Ref RestAPIAllowed
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref Authorizer
-      HttpMethod: OPTIONS
+      HttpMethod: POST
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -212,7 +212,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
-        IntegrationHttpMethod: OPTIONS
+        IntegrationHttpMethod: POST
         IntegrationResponses:
           - StatusCode: 200
           - StatusCode: 502
@@ -410,7 +410,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt Service.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/OPTIONS/retrieve
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/POST/retrieve
 
   ServiceInvokeAllowed:
     Type: AWS::Lambda::Permission
@@ -418,4 +418,4 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt Service.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/OPTIONS/allowed
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/POST/allowed
