@@ -42,7 +42,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	if err != nil {
 		fmt.Println(fmt.Sprintf("%v Err: %v", request.Resource, err))
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body: fmt.Sprintf("handler err: %v", err),
+		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{

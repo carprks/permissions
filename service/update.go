@@ -2,13 +2,14 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 func update(body string) (string, error) {
 	req := Permissions{}
 	err := json.Unmarshal([]byte(body), &req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("update unmarshall err: %w", err)
 	}
 
 	p := Permissions{
@@ -16,22 +17,22 @@ func update(body string) (string, error) {
 	}
 	p, err = p.RetrieveEntry()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("update retrieve entry err: %w", err)
 	}
 
 	n, err := p.update(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("update update err: %w", err)
 	}
 
 	resp, err := p.UpdateEntry(n)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("update update entry err: %w", err)
 	}
 
 	res, err := json.Marshal(resp)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("update marsahll err: %w", err)
 	}
 
 	return string(res), nil
