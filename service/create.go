@@ -6,6 +6,8 @@ import (
 )
 
 func create(body string) (string, error) {
+	fmt.Println(fmt.Sprintf("create permissions start"))
+
 	p := Permissions{}
 	err := json.Unmarshal([]byte(body), &p)
 	if err != nil {
@@ -25,6 +27,8 @@ func create(body string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("create entry marshall err: %w", err)
 	}
+
+	fmt.Println(fmt.Sprintf("create permissions: %s", resp.Identifier))
 
 	return string(res), nil
 }

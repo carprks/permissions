@@ -6,6 +6,8 @@ import (
 )
 
 func delete(body string) (string, error) {
+	fmt.Println(fmt.Sprintf("delete permissions start"))
+
 	p := Permissions{}
 	err := json.Unmarshal([]byte(body), &p)
 	if err != nil {
@@ -21,6 +23,8 @@ func delete(body string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("delete marshall err: %w", err)
 	}
+
+	fmt.Println(fmt.Sprintf("delete permissions: %s", resp.Identifier))
 
 	return string(res), nil
 }

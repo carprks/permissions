@@ -6,6 +6,8 @@ import (
 )
 
 func update(body string) (string, error) {
+	fmt.Println(fmt.Sprintf("update permissions start"))
+
 	req := Permissions{}
 	err := json.Unmarshal([]byte(body), &req)
 	if err != nil {
@@ -35,6 +37,7 @@ func update(body string) (string, error) {
 		return "", fmt.Errorf("update marsahll err: %w", err)
 	}
 
+	fmt.Println(fmt.Sprintf("update permissions: %s", resp.Identifier))
 	return string(res), nil
 }
 
@@ -67,6 +70,8 @@ func (p Permissions) update(n Permissions) (Permissions, error) {
 }
 
 func deity(body string) (string, error) {
+	fmt.Println(fmt.Sprintf("deity permissions start"))
+
 	req := Permissions{}
 
 	err := json.Unmarshal([]byte(body), &req)
@@ -101,5 +106,6 @@ func deity(body string) (string, error) {
 		return "", fmt.Errorf("deity marsahll err: %w", err)
 	}
 
+	fmt.Println(fmt.Sprintf("deity permisions: %s", resp.Identifier))
 	return string(res), nil
 }

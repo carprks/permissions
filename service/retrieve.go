@@ -6,6 +6,8 @@ import (
 )
 
 func retrieve(body string) (string, error) {
+	fmt.Println("retrieve permissions start")
+
 	p := Permissions{}
 	err := json.Unmarshal([]byte(body), &p)
 	if err != nil {
@@ -22,10 +24,13 @@ func retrieve(body string) (string, error) {
 		return "", fmt.Errorf("retrieve marshall err: %w", err)
 	}
 
+	fmt.Println(fmt.Sprintf("retrieve permissions: %s", resp.Identifier))
 	return string(res), nil
 }
 
 func allowed(body string) (string, error) {
+	fmt.Println(fmt.Sprintf("allowed permissions start"))
+
 	p := Permissions{}
 	err := json.Unmarshal([]byte(body), &p)
 	if err != nil {
@@ -75,5 +80,6 @@ func allowed(body string) (string, error) {
 		return "", fmt.Errorf("allowed marshall err: %w", err)
 	}
 
+	fmt.Println(fmt.Sprintf("allowed permissions: %s", resp.Identifier))
 	return string(res), nil
 }
