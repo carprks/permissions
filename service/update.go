@@ -65,3 +65,41 @@ func (p Permissions) update(n Permissions) (Permissions, error) {
 
 	return r, nil
 }
+
+func deity(body string) (string, error) {
+	req := Permissions{}
+
+	err := json.Unmarshal([]byte(body), &req)
+	if err != nil {
+		return "", fmt.Errorf("deity update unmarshall: %w", err)
+	}
+
+	p := Permissions{
+		Identifier: req.Identifier,
+	}
+
+	p, err = p.RetrieveEntry()
+	if err != nil {
+		return "", fmt.Errorf("deity retrieve: %w", err)
+	}
+
+	req.Permissions = []Permission{
+		{
+			Name:       "*",
+			Identifier: "*",
+			Action:     "*",
+		},
+	}
+
+	resp, err := p.UpdateEntry(req)
+	if err != nil {
+		return "", fmt.Errorf("deity update entry err: %w", err)
+	}
+
+	res, err := json.Marshal(resp)
+	if err != nil {
+		return "", fmt.Errorf("deity marsahll err: %w", err)
+	}
+
+	return string(res), nil
+}

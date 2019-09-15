@@ -38,6 +38,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		resp, err = allowed(request.Body)
 	case "/retrieve":
 		resp, err = retrieve(request.Body)
+	case "/update/deity":
+		resp, err = deity(request.Body)
 	}
 
 	if err != nil {

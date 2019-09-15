@@ -252,6 +252,40 @@ Resources:
           - StatusCode: 502
           - StatusCode: 400
 
+  RestAPIUpdateDeity:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !RestAPIUpdate
+      PathPart: diety
+  RestAPIUpdateDeityPut:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref RestAPIUpdateDeity
+      AuthorizerId: !Ref Authorizer
+      AuthorizationType: CUSTOM
+      HttpMethod: PUT
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 502
+          ResponseModels:
+            application/json: !Ref EmptyModel
+        - StatusCode: 400
+          ResponseModels:
+            application/json: !Ref EmptyModel
+      Integration:
+        Type: AWS_PROXY
+        Uri: !Sub >-
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Service.Arn}/invocations
+        IntegrationHttpMethod: PUT
+        IntegrationResponses:
+          - StatusCode: 200
+          - StatusCode: 502
+          - StatusCode: 400
+
   RestAPIDelete:
     Type: AWS::ApiGateway::Resource
     Properties:
