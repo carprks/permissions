@@ -257,7 +257,7 @@ Resources:
     Properties:
       RestApiId: !Ref RestAPI
       ParentId: !Ref RestAPIUpdate
-      PathPart: diety
+      PathPart: deity
   RestAPIUpdateDeityPut:
     Type: AWS::ApiGateway::Method
     Properties:
